@@ -137,7 +137,10 @@ function LandingTaxSimulation({ onNavigate }: LandingTaxSimulationProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {['20〜29歳', '30〜39歳', '40〜49歳', '50〜59歳', '60〜64歳', '65歳以上'].map((age) => (
                 <button
-                  key={age}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    onNavigate('landing');
+                  }}
                   onClick={() => setData(prev => ({ ...prev, age }))}
                   className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                     data.age === age
@@ -395,7 +398,10 @@ function LandingTaxSimulation({ onNavigate }: LandingTaxSimulationProps) {
         {/* アクションボタン */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
-            onClick={() => onNavigate('landing')}
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              onNavigate('landing');
+            }}
             className="flex items-center justify-center space-x-2 px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/30 text-white rounded-full font-bold text-lg transition-all duration-300"
           >
             <Home className="w-5 h-5" />
@@ -411,7 +417,10 @@ function LandingTaxSimulation({ onNavigate }: LandingTaxSimulationProps) {
           </button>
           
           <button
-            onClick={() => onNavigate('register')}
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              onNavigate('register');
+            }}
             className="flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-full font-bold text-lg shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-105"
           >
             <UserPlus className="w-5 h-5" />
@@ -529,7 +538,10 @@ function LandingTaxSimulation({ onNavigate }: LandingTaxSimulationProps) {
           {/* ナビゲーションボタン */}
           <div className="flex justify-between">
             <button
-              onClick={prevStep}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                onNavigate('landing');
+              }}
               disabled={currentStep === 1}
               className={`flex items-center space-x-2 px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 ${
                 currentStep === 1

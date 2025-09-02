@@ -217,19 +217,49 @@ function LandingPage({ onNavigate }: LandingPageProps) {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <button 
-                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => {
+                  const element = document.getElementById('features');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="text-white/80 hover:text-white transition-colors font-medium"
               >
                 機能
               </button>
               <button 
-                onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => {
+                  const element = document.getElementById('pricing');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="text-white/80 hover:text-white transition-colors font-medium"
               >
                 料金
               </button>
-              <a href="#testimonials" className="text-white/80 hover:text-white transition-colors font-medium">導入事例</a>
-              <a href="#contact" className="text-white/80 hover:text-white transition-colors font-medium">お問い合わせ</a>
+              <button 
+                onClick={() => {
+                  const element = document.getElementById('testimonials');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="text-white/80 hover:text-white transition-colors font-medium"
+              >
+                導入事例
+              </button>
+              <button 
+                onClick={() => {
+                  const element = document.getElementById('contact');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="text-white/80 hover:text-white transition-colors font-medium"
+              >
+                お問い合わせ
+              </button>
               <button
                 onClick={() => onNavigate('login')}
                 className="px-6 py-3 bg-gradient-to-r from-navy-600 to-navy-800 hover:from-navy-700 hover:to-navy-900 text-white rounded-full font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
@@ -253,19 +283,53 @@ function LandingPage({ onNavigate }: LandingPageProps) {
           <div className="md:hidden absolute top-full left-0 right-0 backdrop-blur-xl bg-slate-900/95 border-b border-white/20">
             <div className="px-4 py-6 space-y-4">
               <button 
-                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => {
+                  const element = document.getElementById('features');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  setIsMenuOpen(false);
+                }}
                 className="block text-white/80 hover:text-white transition-colors font-medium py-2 text-left w-full"
               >
                 機能
               </button>
               <button 
-                onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => {
+                  const element = document.getElementById('pricing');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  setIsMenuOpen(false);
+                }}
                 className="block text-white/80 hover:text-white transition-colors font-medium py-2 text-left w-full"
               >
                 料金
               </button>
-              <a href="#testimonials" className="block text-white/80 hover:text-white transition-colors font-medium py-2">導入事例</a>
-              <a href="#contact" className="block text-white/80 hover:text-white transition-colors font-medium py-2">お問い合わせ</a>
+              <button 
+                onClick={() => {
+                  const element = document.getElementById('testimonials');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  setIsMenuOpen(false);
+                }}
+                className="block text-white/80 hover:text-white transition-colors font-medium py-2 text-left w-full"
+              >
+                導入事例
+              </button>
+              <button 
+                onClick={() => {
+                  const element = document.getElementById('contact');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  setIsMenuOpen(false);
+                }}
+                className="block text-white/80 hover:text-white transition-colors font-medium py-2 text-left w-full"
+              >
+                お問い合わせ
+              </button>
               <button
                 onClick={() => onNavigate('login')}
                 className="w-full px-6 py-3 bg-gradient-to-r from-navy-600 to-navy-800 hover:from-navy-700 hover:to-navy-900 text-white rounded-full font-semibold shadow-xl transition-all duration-300"
@@ -301,7 +365,10 @@ function LandingPage({ onNavigate }: LandingPageProps) {
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <button
-                onClick={() => onNavigate('register')}
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  onNavigate('register');
+                }}
                 className="group px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-full font-bold text-lg shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-105 flex items-center space-x-3"
               >
                 <span>無料ではじめる</span>
@@ -309,7 +376,10 @@ function LandingPage({ onNavigate }: LandingPageProps) {
               </button>
               
               <button
-                onClick={() => onNavigate('login')}
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  onNavigate('login');
+                }}
                 className="group px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/30 text-white rounded-full font-semibold text-lg transition-all duration-300 flex items-center space-x-3"
               >
                 <User className="w-5 h-5" />
@@ -510,7 +580,10 @@ function LandingPage({ onNavigate }: LandingPageProps) {
                     </div>
                   )}
                   <button
-                    onClick={() => onNavigate('register')}
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      onNavigate('register');
+                    }}
                     className={`w-full px-6 py-4 ${plan.buttonStyle} text-white rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105`}
                   >
                     {plan.name === 'Pro' ? '7日間の無料トライアル' : plan.buttonText}
@@ -574,7 +647,10 @@ function LandingPage({ onNavigate }: LandingPageProps) {
               
               <div className="text-center mt-8">
                 <button
-                  onClick={() => onNavigate('register')}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    onNavigate('register');
+                  }}
                   className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-full font-bold text-lg shadow-2xl hover:shadow-amber-500/25 transition-all duration-300 transform hover:scale-105"
                 >
                   初期設定オプションで始める
@@ -637,15 +713,45 @@ function LandingPage({ onNavigate }: LandingPageProps) {
                     料金プラン
                   </button>
                 </li>
-                <li><button onClick={() => onNavigate('api-documentation')} className="hover:text-white transition-colors text-left">API ドキュメント</button></li>
+                <li>
+                  <button 
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      onNavigate('api-documentation');
+                    }} 
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    API ドキュメント
+                  </button>
+                </li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-base lg:text-lg font-bold text-white mb-4 lg:mb-6">サポート</h3>
               <ul className="space-y-2 lg:space-y-3 text-sm lg:text-base text-white/70">
-                <li><button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors text-left">ヘルプセンター</button></li>
-                <li><button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors text-left">お問い合わせ</button></li>
+                <li>
+                  <button 
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      onNavigate('contact');
+                    }} 
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    ヘルプセンター
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      onNavigate('contact');
+                    }} 
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    お問い合わせ
+                  </button>
+                </li>
                 <li>
                   <button 
                     onClick={() => {
@@ -664,10 +770,42 @@ function LandingPage({ onNavigate }: LandingPageProps) {
           <div className="border-t border-white/20 mt-10 lg:mt-12 pt-6 lg:pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm text-white/60">
-                <button onClick={() => onNavigate('company-info')} className="hover:text-white transition-colors">会社概要</button>
-                <button onClick={() => onNavigate('privacy-policy')} className="hover:text-white transition-colors">プライバシーポリシー</button>
-                <button onClick={() => onNavigate('terms-of-service')} className="hover:text-white transition-colors">利用規約</button>
-                <button onClick={() => onNavigate('security')} className="hover:text-white transition-colors">セキュリティ</button>
+                <button 
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    onNavigate('company-info');
+                  }} 
+                  className="hover:text-white transition-colors"
+                >
+                  会社概要
+                </button>
+                <button 
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    onNavigate('privacy-policy');
+                  }} 
+                  className="hover:text-white transition-colors"
+                >
+                  プライバシーポリシー
+                </button>
+                <button 
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    onNavigate('terms-of-service');
+                  }} 
+                  className="hover:text-white transition-colors"
+                >
+                  利用規約
+                </button>
+                <button 
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    onNavigate('security');
+                  }} 
+                  className="hover:text-white transition-colors"
+                >
+                  セキュリティ
+                </button>
               </div>
               <div className="text-center md:text-right">
             <p className="text-white/60">

@@ -270,7 +270,10 @@ function PrivacyPolicy({ onNavigate }: PrivacyPolicyProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <button
-              onClick={() => onNavigate('landing')}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                onNavigate('landing');
+              }}
               className="flex items-center space-x-3"
             >
               <img 
@@ -282,7 +285,10 @@ function PrivacyPolicy({ onNavigate }: PrivacyPolicyProps) {
             </button>
             
             <button
-              onClick={() => onNavigate('landing')}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                onNavigate('landing');
+              }}
               className="flex items-center space-x-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/30 text-white rounded-full font-semibold transition-all duration-300"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -478,7 +484,10 @@ function PrivacyPolicy({ onNavigate }: PrivacyPolicyProps) {
           {/* 戻るボタン */}
           <div className="text-center mt-16">
             <button
-              onClick={() => onNavigate('landing')}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                onNavigate('landing');
+              }}
               className="flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-navy-600 to-navy-800 hover:from-navy-700 hover:to-navy-900 text-white rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 mx-auto"
             >
               <ArrowLeft className="w-5 h-5" />
