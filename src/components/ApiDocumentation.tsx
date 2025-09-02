@@ -418,9 +418,6 @@ applications = client.applications.list()`}
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 onNavigate('landing');
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                onNavigate('landing');
               }}
               className="flex items-center space-x-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/30 text-white rounded-full font-semibold transition-all duration-300"
             >
