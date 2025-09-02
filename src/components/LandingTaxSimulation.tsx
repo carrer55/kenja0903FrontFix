@@ -424,7 +424,7 @@ function LandingTaxSimulation({ onNavigate }: LandingTaxSimulationProps) {
             className="flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-full font-bold text-lg shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-105"
           >
             <UserPlus className="w-5 h-5" />
-            <span>Proプランで節税をはじめる</span>
+            <span>早速、Proプランで節税を始める</span>
           </button>
         </div>
       </div>
@@ -542,15 +542,12 @@ function LandingTaxSimulation({ onNavigate }: LandingTaxSimulationProps) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 onNavigate('landing');
               }}
-              disabled={currentStep === 1}
               className={`flex items-center space-x-2 px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 ${
-                currentStep === 1
-                  ? 'bg-white/10 text-white/40 cursor-not-allowed'
-                  : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-xl border border-white/30'
+                'bg-white/20 hover:bg-white/30 text-white backdrop-blur-xl border border-white/30'
               }`}
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>戻る</span>
+              <span>トップページに戻る</span>
             </button>
 
             {currentStep < 5 ? (

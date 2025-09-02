@@ -460,6 +460,65 @@ function LandingPage({ onNavigate }: LandingPageProps) {
         </div>
       </section>
 
+      {/* Tax Simulation CTA Section */}
+      <section className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-3xl p-8 lg:p-16 border border-emerald-300/30 shadow-2xl text-center relative overflow-hidden">
+            {/* 装飾的な背景エフェクト */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 rounded-full -translate-y-20 translate-x-20"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-teal-300/15 to-teal-500/15 rounded-full translate-y-16 -translate-x-16"></div>
+            
+            <div className="relative z-10">
+              <div className="w-20 h-20 mx-auto mb-8 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl flex items-center justify-center shadow-2xl">
+                <Calculator className="w-10 h-10 text-white" />
+              </div>
+              
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+                <span className="bg-gradient-to-r from-emerald-300 to-teal-300 bg-clip-text text-transparent">
+                  年間200万円以上の節税効果
+                </span>
+              </h2>
+              
+              <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+                出張日当制度の導入で、どれくらいの節税効果があるかを
+                <br className="hidden md:block" />
+                <span className="font-semibold text-emerald-300">無料で簡単にシミュレーション</span>できます
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-8">
+                <div className="flex items-center space-x-3 text-white/80">
+                  <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  <span>5つの質問に答えるだけ</span>
+                </div>
+                <div className="flex items-center space-x-3 text-white/80">
+                  <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  <span>詳細な計算結果を表示</span>
+                </div>
+                <div className="flex items-center space-x-3 text-white/80">
+                  <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  <span>完全無料</span>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  onNavigate('landing-tax-simulation');
+                }}
+                className="group px-10 py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-full font-bold text-xl shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-105 flex items-center space-x-3 mx-auto"
+              >
+                <Calculator className="w-6 h-6" />
+                <span>無料で節税シミュレーションを試す</span>
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              </button>
+              
+              <p className="text-emerald-200 text-sm mt-4">
+                ※ 登録不要・完全無料でご利用いただけます
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* Testimonials Section */}
       <section id="testimonials" className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
