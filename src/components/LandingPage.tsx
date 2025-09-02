@@ -23,9 +23,10 @@ import {
 
 interface LandingPageProps {
   onNavigate: (view: string) => void;
+  onNavigateToContact: (inquiryType?: string) => void;
 }
 
-function LandingPage({ onNavigate }: LandingPageProps) {
+function LandingPage({ onNavigate, onNavigateToContact }: LandingPageProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [scrollY, setScrollY] = useState(0);
@@ -641,11 +642,16 @@ function LandingPage({ onNavigate }: LandingPageProps) {
                   <button
                     onClick={() => {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
-                      onNavigate('register');
+                      if (plan.name === 'Enterprise') {
+                        onNavigateToContact('enterprise');
+                      } else {
+                        onNavigate('register');
+                      }
                     }}
-                    className={`w-full px-6 py-4 ${plan.buttonStyle} text-white rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105`}
+                    className={`w-full px-6 py-4 ${plan.name === 'Enterprise' ? 'bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900' : plan.buttonStyle} text-white rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105`}
                   >
-                    {plan.name === 'Pro' ? '7日間の無料トライアル' : plan.buttonText}
+                    {plan.name === 'Pro' ? '7日間の無料トライアル' : 
+                     plan.name === 'Enterprise' ? 'お問い合わせ' : plan.buttonText}
                   </button>
                 </div>
               </div>
@@ -708,7 +714,7 @@ function LandingPage({ onNavigate }: LandingPageProps) {
                 <button
                   onClick={() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                    onNavigate('register');
+                    onNavigateToContact('initial-setup');
                   }}
                   className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-full font-bold text-lg shadow-2xl hover:shadow-amber-500/25 transition-all duration-300 transform hover:scale-105"
                 >
@@ -793,7 +799,7 @@ function LandingPage({ onNavigate }: LandingPageProps) {
                   <button 
                     onClick={() => {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
-                      onNavigate('contact');
+                      onNavigateToContact();
                     }} 
                     className="hover:text-white transition-colors text-left"
                   >
@@ -804,7 +810,7 @@ function LandingPage({ onNavigate }: LandingPageProps) {
                   <button 
                     onClick={() => {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
-                      onNavigate('contact');
+                      onNavigateToContact();
                     }} 
                     className="hover:text-white transition-colors text-left"
                   >
