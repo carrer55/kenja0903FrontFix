@@ -741,6 +741,7 @@ function LandingPage({ onNavigate, onNavigateToContact }: LandingPageProps) {
               </div>
               <p className="text-white/70 mb-6 max-w-sm lg:max-w-md text-sm lg:text-base">
                 出張精算に特化した革新的なソリューション。
+                <br />
                 AI技術で効率化と節税効果を同時に実現。
               </p>
               <div className="flex space-x-4">
