@@ -3,9 +3,10 @@ import { ArrowLeft, Mail, Phone, MessageCircle, Send, MapPin, Clock, CheckCircle
 
 interface ContactPageProps {
   onNavigate: (view: string) => void;
+  initialInquiryType?: string;
 }
 
-function ContactPage({ onNavigate }: ContactPageProps) {
+function ContactPage({ onNavigate, initialInquiryType }: ContactPageProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,7 +14,7 @@ function ContactPage({ onNavigate }: ContactPageProps) {
     phone: '',
     subject: '',
     message: '',
-    inquiryType: 'general'
+    inquiryType: initialInquiryType || 'general'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -42,6 +43,8 @@ function ContactPage({ onNavigate }: ContactPageProps) {
     { value: 'general', label: '一般的なお問い合わせ' },
     { value: 'demo', label: 'デモ・トライアルについて' },
     { value: 'pricing', label: '料金・プランについて' },
+    { value: 'enterprise', label: 'Enterpriseプランへの申込み' },
+    { value: 'initial-setup', label: '初期設定オプションへの申込み' },
     { value: 'technical', label: '技術的なサポート' },
     { value: 'partnership', label: 'パートナーシップ' }
   ];

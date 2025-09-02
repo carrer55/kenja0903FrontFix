@@ -18,6 +18,7 @@ import ContactPage from './ContactPage';
 
 function AuthWrapper() {
   const [currentView, setCurrentView] = useState<string>('landing');
+  const [contactInquiryType, setContactInquiryType] = useState<string>('');
   const { isAuthenticated, loading } = useAuth();
 
   const handleLoginSuccess = () => {
@@ -34,6 +35,11 @@ function AuthWrapper() {
     setCurrentView(view);
   };
 
+  const navigateToContact = (inquiryType?: string) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setContactInquiryType(inquiryType || '');
+    setCurrentView('contact');
+  };
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
@@ -53,7 +59,7 @@ function AuthWrapper() {
 
   switch (currentView) {
     case 'landing':
-      return <LandingPage onNavigate={navigateToView} />;
+      return <LandingPage onNavigate={navigateToView} onNavigateToContact={navigateToContact} />;
     case 'landing-tax-simulation':
       return <LandingTaxSimulation onNavigate={navigateToView} />;
     case 'api-documentation':
@@ -67,7 +73,7 @@ function AuthWrapper() {
     case 'terms-of-service':
       return <TermsOfService onNavigate={navigateToView} />;
     case 'contact':
-      return <ContactPage onNavigate={navigateToView} />;
+      return <ContactPage onNavigate={navigateToView} initialInquiryType={contactInquiryType} />;
     case 'login':
       return <Login onNavigate={navigateToView} onLoginSuccess={handleLoginSuccess} />;
     case 'register':
