@@ -165,7 +165,7 @@ function LandingPage({ onNavigate }: LandingPageProps) {
     { number: '95%', label: '業務時間削減', icon: Clock },
     { number: '99.9%', label: '信頼性', icon: Shield },
     { number: '3倍', label: '業務効率向上', icon: TrendingUp },
-    { number: '200万円', label: '平均年間節税額', icon: Calculator }
+    { number: '100万円', label: '平均年間節税額', icon: Calculator }
   ];
 
   return (
@@ -360,7 +360,7 @@ function LandingPage({ onNavigate }: LandingPageProps) {
               出張旅費精算を革新する、AI搭載のオールインワンソリューション。
               <br />
               AIで賢く効率化し、
-              <span className="text-emerald-300 font-semibold">年間200万円以上の節税効果</span>を実現。
+              <span className="text-emerald-300 font-semibold">年間100万円以上の節税効果</span>を実現。
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -475,7 +475,7 @@ function LandingPage({ onNavigate }: LandingPageProps) {
               
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
                 <span className="bg-gradient-to-r from-emerald-300 to-teal-300 bg-clip-text text-transparent">
-                  年間200万円以上の節税効果
+                  年間100万円以上の節税効果
                 </span>
               </h2>
               
