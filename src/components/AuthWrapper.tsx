@@ -29,6 +29,8 @@ function AuthWrapper() {
   };
 
   const navigateToView = (view: string) => {
+    // ページ遷移時に最上部にスクロール
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentView(view);
   };
 
