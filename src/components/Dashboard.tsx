@@ -27,7 +27,8 @@ import ApproverDashboard from './ApproverDashboard';
 import UserManagement from './UserManagement';
 import AdminApplicationList from './AdminApplicationList';
 import AdminApplicationDetail from './AdminApplicationDetail';
-import { useUserProfile } from './UserProfileProvider';
+import DepartmentManagement from './DepartmentManagement';
+import { useAuth } from '../contexts/AuthContext';
 
 function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -35,7 +36,7 @@ function Dashboard() {
   const [applicationDetail, setApplicationDetail] = useState<{type: 'business-trip' | 'expense', id: string} | null>(null);
   const [documentType, setDocumentType] = useState<string>('');
   const [documentId, setDocumentId] = useState<string>('');
-  const { userRole } = useUserProfile();
+  const { userRole } = useAuth();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -73,8 +74,8 @@ function Dashboard() {
       case 'document-management':
         return <DocumentManagement onNavigate={navigateToView} />;
       case 'document-editor':
-        const businessTripId = localStorage.getItem('editingBusinessTripId') || 'BT-2024-001';
-        const docType = localStorage.getItem('editingDocumentType') as 'business-report' | 'expense-report' || 'business-report';
+        const businessTripId = new URLSearchParams(window.location.search).get('businessTripId') || '';
+        const docType = new URLSearchParams(window.location.search).get('docType') as 'business-report' | 'expense-report' || 'business-report';
         return <DocumentEditor onNavigate={navigateToView} documentType={docType} businessTripId={businessTripId} />;
       case 'past-applications-search':
         return <PastApplicationsSearch onNavigate={navigateToView} />;
@@ -106,6 +107,8 @@ function Dashboard() {
         return <AdminApplicationList onNavigate={navigateToView} />;
       case 'admin-application-detail':
         return <AdminApplicationDetail onNavigate={navigateToView} />;
+      case 'department-management':
+        return <DepartmentManagement onNavigate={navigateToView} />;
       case 'application-detail':
         return applicationDetail ? (
           <ApplicationDetail 

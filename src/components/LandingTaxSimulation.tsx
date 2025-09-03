@@ -138,10 +138,10 @@ function LandingTaxSimulation({ onNavigate }: LandingTaxSimulationProps) {
               {['20〜29歳', '30〜39歳', '40〜49歳', '50〜59歳', '60〜64歳', '65歳以上'].map((age) => (
                 <button
                   onClick={() => {
+                    setData(prev => ({ ...prev, age }));
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                     onNavigate('landing');
                   }}
-                  onClick={() => setData(prev => ({ ...prev, age }))}
                   className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                     data.age === age
                       ? 'border-emerald-400 bg-emerald-500/20 text-emerald-100'

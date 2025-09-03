@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, RotateCcw } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import React, { useState, useEffect } from 'react';
+import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, RotateCcw, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface LoginProps {
   onNavigate: (view: string) => void;
@@ -13,6 +13,16 @@ function Login({ onNavigate, onLoginSuccess }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { login, loading } = useAuth();
+
+  // URLパラメータからエラーメッセージを取得
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    
+    if (errorParam === 'email_confirmation_failed') {
+      setError('メール確認に失敗しました。再度メール確認を行ってください。');
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,8 +60,11 @@ function Login({ onNavigate, onLoginSuccess }: LoginProps) {
           <div className="backdrop-blur-xl bg-white/20 rounded-xl p-8 border border-white/30 shadow-2xl">
             <form onSubmit={handleLogin} className="space-y-6">
               {error && (
-                <div className="bg-red-50/50 border border-red-200/50 rounded-lg p-4">
-                  <p className="text-red-700 text-sm">{error}</p>
+                <div className="bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-lg p-4">
+                  <div className="flex items-center space-x-2">
+                    <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                    <p className="text-red-700 text-sm">{error}</p>
+                  </div>
                 </div>
               )}
 
@@ -59,8 +72,11 @@ function Login({ onNavigate, onLoginSuccess }: LoginProps) {
               <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-4">
                 <h3 className="font-semibold text-blue-800 mb-2">デモアカウント</h3>
                 <p className="text-blue-700 text-sm mb-2">
-                  メールアドレス: <code className="bg-blue-100 px-1 rounded">demo</code><br />
-                  パスワード: <code className="bg-blue-100 px-1 rounded">pass9981</code>
+                  メールアドレス: <code className="bg-blue-100 px-1 rounded">demo@example.com</code><br />
+                  パスワード: <code className="bg-blue-100 px-1 rounded">demo123456</code>
+                </p>
+                <p className="text-blue-600 text-xs">
+                  ※ 新規登録も可能です
                 </p>
               </div>
 

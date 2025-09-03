@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, History, Upload, Download, FileText } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 interface TravelRegulationManagementProps {
   onNavigate: (view: 'dashboard' | 'business-trip' | 'expense' | 'tax-simulation' | 'travel-regulation-management' | 'travel-regulation-creation' | 'travel-regulation-history') => void;
@@ -31,12 +33,60 @@ function TravelRegulationManagement({ onNavigate }: TravelRegulationManagementPr
   const [regulations, setRegulations] = useState<Regulation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+
+  const fetchRegulations = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('travel_regulations')
+        .select(`
+          *,
+          profiles!travel_regulations_created_by_user_id_fkey (
+            full_name
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching regulations:', error);
+        return;
+      }
+
+      // SupabaseデータをRegulation形式に変換
+      const formattedRegulations: Regulation[] = data?.map(reg => ({
+        id: reg.id,
+        companyName: reg.company_name || '',
+        version: reg.version || 'v1.0',
+        createdAt: reg.created_at,
+        updatedAt: reg.updated_at,
+        status: reg.status as 'active' | 'draft' | 'archived',
+        domesticAllowance: {
+          executive: 0, // 実際のデータ構造に合わせて調整
+          manager: 0,
+          general: 0
+        },
+        overseasAllowance: {
+          executive: 0,
+          manager: 0,
+          general: 0
+        }
+      })) || [];
+
+      setRegulations(formattedRegulations);
+    } catch (error) {
+      console.error('Error fetching regulations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // ローカルストレージから規程データを読み込み
-    const savedRegulations = JSON.parse(localStorage.getItem('travelRegulations') || '[]');
-    setRegulations(savedRegulations);
-  }, []);
+    fetchRegulations();
+  }, [user]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -47,18 +97,32 @@ function TravelRegulationManagement({ onNavigate }: TravelRegulationManagementPr
     (regulation.version || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('この規程を削除してもよろしいですか？')) {
-      const updatedRegulations = regulations.filter(reg => reg.id !== id);
-      setRegulations(updatedRegulations);
-      localStorage.setItem('travelRegulations', JSON.stringify(updatedRegulations));
+      try {
+        const { error } = await supabase
+          .from('travel_regulations')
+          .delete()
+          .eq('id', id);
+
+        if (error) {
+          console.error('Error deleting regulation:', error);
+          alert('規程の削除に失敗しました');
+          return;
+        }
+
+        await fetchRegulations();
+        alert('規程を削除しました');
+      } catch (error) {
+        console.error('Error deleting regulation:', error);
+        alert('規程の削除に失敗しました');
+      }
     }
   };
 
   const handleEdit = (id: string) => {
     // 編集機能は規程作成画面で実装
-    localStorage.setItem('editingRegulationId', id);
-    onNavigate('travel-regulation-creation');
+    onNavigate(`travel-regulation-creation?id=${id}`);
   };
 
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +142,8 @@ function TravelRegulationManagement({ onNavigate }: TravelRegulationManagementPr
       
       const updatedRegulations = [...regulations, newRegulation];
       setRegulations(updatedRegulations);
-      localStorage.setItem('travelRegulations', JSON.stringify(updatedRegulations));
+      // Supabaseに保存（実際の実装では適切なテーブルに保存）
+      // await supabase.from('travel_regulations').insert(newRegulation);
       setShowUploadModal(false);
       alert('PDFファイルがアップロードされました。');
     } else {

@@ -116,15 +116,11 @@ function DocumentManagement({ onNavigate }: DocumentManagementProps) {
   ).length;
 
   const createBusinessReport = (businessTripId: string) => {
-    localStorage.setItem('editingBusinessTripId', businessTripId);
-    localStorage.setItem('editingDocumentType', 'business-report');
-    onNavigate('document-editor');
+    onNavigate(`document-editor?businessTripId=${businessTripId}&docType=business-report`);
   };
 
   const createExpenseReport = (businessTripId: string) => {
-    localStorage.setItem('editingBusinessTripId', businessTripId);
-    localStorage.setItem('editingDocumentType', 'expense-report');
-    onNavigate('document-editor');
+    onNavigate(`document-editor?businessTripId=${businessTripId}&docType=expense-report`);
   };
 
   const handleReportComplete = (businessTripId: string) => {

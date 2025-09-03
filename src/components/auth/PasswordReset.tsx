@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, ArrowLeft, RotateCcw, CheckCircle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface PasswordResetProps {
   onNavigate: (view: string) => void;
@@ -9,16 +10,27 @@ function PasswordReset({ onNavigate }: PasswordResetProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState('');
+  const { resetPassword } = useAuth();
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setIsLoading(true);
 
-    // ローカル実装では、実際のメール送信は行わない
-    setTimeout(() => {
-      setIsSuccess(true);
+    try {
+      const result = await resetPassword(email);
+      
+      if (result.success) {
+        setIsSuccess(true);
+      } else {
+        setError(result.error || 'パスワードリセットに失敗しました');
+      }
+    } catch (error) {
+      setError('パスワードリセットに失敗しました');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   if (isSuccess) {
@@ -35,10 +47,10 @@ function PasswordReset({ onNavigate }: PasswordResetProps) {
                   <CheckCircle className="w-10 h-10 text-emerald-600" />
                 </div>
                 <h1 className="text-3xl lg:text-4xl font-bold text-emerald-800 mb-4">
-                  パスワードリセット完了
+                  リセットメール送信完了
                 </h1>
-                <p className="text-xl text-slate-700 mb-2">パスワードがリセットされました</p>
-                <p className="text-slate-600">新しいパスワードでログインしてください</p>
+                <p className="text-xl text-slate-700 mb-2">パスワードリセットメールを送信しました</p>
+                <p className="text-slate-600">メール内のリンクから新しいパスワードを設定してください</p>
               </div>
 
               <button
@@ -74,6 +86,12 @@ function PasswordReset({ onNavigate }: PasswordResetProps) {
           {/* パスワードリセットフォーム */}
           <div className="backdrop-blur-xl bg-white/20 rounded-xl p-8 border border-white/30 shadow-2xl">
             <form onSubmit={handlePasswordReset} className="space-y-6">
+              {error && (
+                <div className="bg-red-50/50 border border-red-200/50 rounded-lg p-4">
+                  <p className="text-red-700 text-sm">{error}</p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   メールアドレス

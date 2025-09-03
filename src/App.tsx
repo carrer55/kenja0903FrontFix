@@ -1,13 +1,13 @@
 import React from 'react';
 import AuthWrapper from './components/AuthWrapper';
-import { UserProfileProvider } from './components/UserProfileProvider';
+import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
 
 function App() {
   return (
-    <UserProfileProvider>
+    <AuthProvider>
       <AuthWrapper />
-    </UserProfileProvider>
+    </AuthProvider>
   );
 }
 

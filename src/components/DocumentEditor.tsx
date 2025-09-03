@@ -142,11 +142,9 @@ function DocumentEditor({ onNavigate, documentType, businessTripId }: DocumentEd
       }
       // 出張報告書を保存して出張経費精算書作成画面に遷移
       alert('出張報告書が保存されました');
-      // 確実に出張経費精算書作成画面に遷移
+      // 確実に出張経費精算書作成画面に遷移（URLパラメータを使用）
       setTimeout(() => {
-        localStorage.setItem('editingBusinessTripId', businessTripId);
-        localStorage.setItem('editingDocumentType', 'expense-report');
-        onNavigate('document-editor');
+        onNavigate(`document-editor?businessTripId=${businessTripId}&docType=expense-report`);
       }, 100);
     } else {
       if (includeTravelExpenses && expenseReportData.selectedExpenses.length === 0) {

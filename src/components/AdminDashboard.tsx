@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, Download, Filter, Search, Calendar, Users, TrendingUp, BarChart3, Clock, CheckCircle, FileText, Receipt, Eye } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
-import { useUserProfile } from './UserProfileProvider';
+import { useAuth } from '../contexts/AuthContext';
+import { useApplications } from '../hooks/useApplications';
 
 interface AdminDashboardProps {
   onNavigate: (view: string) => void;
@@ -14,7 +15,7 @@ interface AdminApplication {
   category: 'application' | 'settlement';
   title: string;
   applicant: string;
-  department: string;
+  department_name: string;
   amount: number;
   submittedDate: string;
   status: 'pending' | 'approved' | 'rejected' | 'on_hold';
@@ -31,103 +32,31 @@ function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  
+  const { user, userRole } = useAuth();
+  const { applications } = useApplications();
   const [showAllApplications, setShowAllApplications] = useState(false);
-  const { userRole } = useUserProfile();
 
-  const [applications] = useState<AdminApplication[]>([
-    {
-      id: 'BT-2024-001',
-      type: 'business-trip',
-      category: 'application',
-      title: '東京出張申請',
-      applicant: '田中太郎',
-      department: '営業部',
-      amount: 52500,
-      submittedDate: '2024-07-20',
-      status: 'pending',
-      approver: '佐藤部長',
-      purpose: 'クライアント訪問および新規開拓営業',
-      startDate: '2024-07-25',
-      endDate: '2024-07-27',
-      location: '東京都港区'
-    },
-    {
-      id: 'BT-2024-002',
-      type: 'business-trip',
-      category: 'application',
-      title: '大阪出張申請',
-      applicant: '鈴木次郎',
-      department: '開発部',
-      amount: 35000,
-      submittedDate: '2024-07-15',
-      status: 'approved',
-      approver: '山田経理',
-      purpose: '支社会議参加',
-      startDate: '2024-07-20',
-      endDate: '2024-07-21',
-      location: '大阪府大阪市'
-    },
-    {
-      id: 'EX-2024-001',
-      type: 'expense',
-      category: 'application',
-      title: '交通費申請',
-      applicant: '佐藤花子',
-      department: '総務部',
-      amount: 12800,
-      submittedDate: '2024-07-18',
-      status: 'pending',
-      approver: '田中部長'
-    },
-    {
-      id: 'ST-2024-001',
-      type: 'business-trip',
-      category: 'settlement',
-      title: '東京出張精算',
-      applicant: '高橋美咲',
-      department: '企画部',
-      amount: 48500,
-      submittedDate: '2024-07-10',
-      status: 'pending',
-      approver: '鈴木取締役'
-    },
-    {
-      id: 'ST-2024-002',
-      type: 'expense',
-      category: 'settlement',
-      title: '会議費精算',
-      applicant: '伊藤健一',
-      department: '営業部',
-      amount: 8500,
-      submittedDate: '2024-07-05',
-      status: 'approved',
-      approver: '佐藤部長'
-    },
-    {
-      id: 'BT-2024-003',
-      type: 'business-trip',
-      category: 'application',
-      title: '福岡出張申請',
-      applicant: '山田花子',
-      department: '営業部',
-      amount: 45000,
-      submittedDate: '2024-07-12',
-      status: 'approved',
-      approver: '佐藤部長'
-    },
-    {
-      id: 'EX-2024-002',
-      type: 'expense',
-      category: 'application',
-      title: '宿泊費申請',
-      applicant: '鈴木美咲',
-      department: '開発部',
-      amount: 15000,
-      submittedDate: '2024-07-08',
-      status: 'pending',
-      approver: '田中部長'
-    }
-  ]);
+  // SupabaseデータをAdminApplication形式に変換
+  const formattedApplications: AdminApplication[] = applications.map(app => ({
+    id: app.id,
+    type: app.type === 'business_trip_request' ? 'business-trip' : 'expense',
+    category: 'application',
+    title: app.title,
+    applicant: app.applicant_name || '',
+    department_name: app.department_name || '',
+    amount: app.total_amount || 0,
+    submittedDate: app.submitted_at || app.created_at,
+    status: app.status as 'pending' | 'approved' | 'rejected' | 'on_hold',
+    approver: app.approver_name || '',
+    purpose: app.metadata?.purpose,
+    startDate: app.metadata?.start_date,
+    endDate: app.metadata?.end_date,
+    location: app.metadata?.location,
+    daysWaiting: app.days_waiting || 0
+  }));
+
+  // Supabaseから取得したデータを使用
 
   const departments = ['営業部', '総務部', '開発部', '企画部', '経理部'];
 
@@ -160,10 +89,10 @@ function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   };
 
   const getCardData = () => {
-    const applicationPending = applications.filter(app => app.category === 'application' && app.status === 'pending').length;
-    const applicationApproved = applications.filter(app => app.category === 'application' && app.status === 'approved').length;
-    const settlementPending = applications.filter(app => app.category === 'settlement' && app.status === 'pending').length;
-    const settlementApproved = applications.filter(app => app.category === 'settlement' && app.status === 'approved').length;
+    const applicationPending = formattedApplications.filter(app => app.category === 'application' && app.status === 'pending').length;
+    const applicationApproved = formattedApplications.filter(app => app.category === 'application' && app.status === 'approved').length;
+    const settlementPending = formattedApplications.filter(app => app.category === 'settlement' && app.status === 'pending').length;
+    const settlementApproved = formattedApplications.filter(app => app.category === 'settlement' && app.status === 'approved').length;
 
     return {
       applicationPending,
@@ -174,7 +103,7 @@ function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   };
 
   const getRecentApplications = () => {
-    const sortedApplications = [...applications].sort((a, b) => 
+    const sortedApplications = [...formattedApplications].sort((a, b) => 
       new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime()
     );
     return showAllApplications ? sortedApplications : sortedApplications.slice(0, 5);
@@ -183,9 +112,8 @@ function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const filteredApplications = getRecentApplications().filter(app => {
     // 部門管理者の場合は自部署のみ表示
     if (userRole === 'department_admin') {
-      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-      const userDepartment = userProfile.departmentName;
-      if (userDepartment && app.department !== userDepartment) {
+      const userDepartment = user?.department_id; // Supabaseから取得した部署IDを使用
+      if (userDepartment && app.department_id !== userDepartment) {
         return false;
       }
     }
@@ -193,7 +121,7 @@ function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     const matchesSearch = app.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          app.applicant.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          app.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = departmentFilter === 'all' || app.department === departmentFilter;
+    const matchesDepartment = departmentFilter === 'all' || app.department_name === departmentFilter;
     const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
     
     let matchesDate = true;
@@ -208,10 +136,11 @@ function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   });
 
   const handleCardClick = (category: 'application' | 'settlement', status: 'pending' | 'approved') => {
-    // カードクリック時の画面遷移
-    localStorage.setItem('adminSelectedCategory', category);
-    localStorage.setItem('adminSelectedStatus', status);
-    onNavigate('admin-application-list');
+    // カードクリック時の画面遷移（URLパラメータを使用）
+    const params = new URLSearchParams();
+    params.set('category', category);
+    params.set('status', status);
+    onNavigate(`admin-application-list?${params.toString()}`);
   };
 
   const handleCSVExport = () => {
@@ -221,7 +150,7 @@ function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       '種別': getTypeLabel(app.type),
       'タイトル': app.title,
       '申請者': app.applicant,
-      '部署': app.department,
+      '部署': app.department_name,
       '金額': app.amount,
       '申請日': app.submittedDate,
       'ステータス': getStatusLabel(app.status),
@@ -463,7 +392,7 @@ function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                             <td className="py-4 px-6 text-slate-700">{getTypeLabel(app.type)}</td>
                             <td className="py-4 px-6 text-slate-800">{app.title}</td>
                             <td className="py-4 px-6 text-slate-800">{app.applicant}</td>
-                            <td className="py-4 px-6 text-slate-700">{app.department}</td>
+                            <td className="py-4 px-6 text-slate-700">{app.department_name}</td>
                             <td className="py-4 px-6 text-slate-800 font-medium">¥{app.amount.toLocaleString()}</td>
                             <td className="py-4 px-6 text-slate-600 text-sm">
                               {new Date(app.submittedDate).toLocaleDateString('ja-JP')}
@@ -477,8 +406,7 @@ function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                               <div className="flex items-center justify-center">
                                 <button
                                   onClick={() => {
-                                    localStorage.setItem('adminSelectedApplication', app.id);
-                                    onNavigate('admin-application-detail');
+                                    onNavigate(`admin-application-detail?id=${app.id}`);
                                   }}
                                   className="p-2 text-slate-600 hover:text-slate-800 hover:bg-white/30 rounded-lg transition-colors"
                                   title="詳細表示"

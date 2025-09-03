@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, UserPlus, Mail, Edit, Trash2, Shield, Users, Building, Search, Filter } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
-import { useUserProfile } from './UserProfileProvider';
+import { useAuth } from '../contexts/AuthContext';
 
 interface UserManagementProps {
   onNavigate: (view: string) => void;
@@ -10,11 +10,11 @@ interface UserManagementProps {
 
 interface TeamUser {
   id: string;
-  name: string;
+  full_name: string;
   email: string;
   role: 'admin' | 'department_admin' | 'approver' | 'general_user';
   plan: 'Free' | 'Pro' | 'Enterprise';
-  department?: string;
+  department_name?: string;
   departmentId?: string;
   status: 'active' | 'invited' | 'inactive';
   invitedAt?: string;
@@ -25,7 +25,7 @@ interface TeamUser {
 interface InviteForm {
   email: string;
   role: 'department_admin' | 'approver' | 'general_user';
-  department: string;
+  department_name: string;
   departmentId: string;
   customMessage: string;
 }
@@ -36,12 +36,12 @@ function UserManagement({ onNavigate }: UserManagementProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const { userPlan, profile } = useUserProfile();
+  const { userPlan, user } = useAuth();
 
   const [inviteForm, setInviteForm] = useState<InviteForm>({
     email: '',
     role: 'general_user',
-    department: '',
+    department_name: '',
     departmentId: '',
     customMessage: ''
   });
@@ -50,7 +50,7 @@ function UserManagement({ onNavigate }: UserManagementProps) {
   const [teamUsers, setTeamUsers] = useState<TeamUser[]>([
     {
       id: '1',
-      name: '山田太郎',
+      full_name: '山田太郎',
       email: 'yamada@example.com',
       role: 'admin',
       plan: userPlan,
@@ -60,11 +60,11 @@ function UserManagement({ onNavigate }: UserManagementProps) {
     },
     {
       id: '2',
-      name: '佐藤花子',
+      full_name: '佐藤花子',
       email: 'sato@example.com',
       role: 'approver',
       plan: userPlan,
-      department: '総務部',
+      department_name: '総務部',
       departmentId: 'dept-001',
       status: 'active',
       lastLogin: '2024-07-19T15:30:00Z',
@@ -72,11 +72,11 @@ function UserManagement({ onNavigate }: UserManagementProps) {
     },
     {
       id: '3',
-      name: '田中次郎',
+      full_name: '田中次郎',
       email: 'tanaka@example.com',
       role: 'general_user',
       plan: userPlan,
-      department: '営業部',
+      department_name: '営業部',
       departmentId: 'dept-002',
       status: 'invited',
       invitedAt: '2024-07-18T09:00:00Z',
@@ -150,7 +150,7 @@ function UserManagement({ onNavigate }: UserManagementProps) {
   };
 
   const filteredUsers = teamUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
@@ -170,22 +170,22 @@ function UserManagement({ onNavigate }: UserManagementProps) {
 
     const newUser: TeamUser = {
       id: Date.now().toString(),
-      name: inviteForm.email.split('@')[0], // 仮の名前
+      full_name: inviteForm.email.split('@')[0], // 仮の名前
       email: inviteForm.email,
       role: inviteForm.role,
       plan: userPlan,
-      department: departments.find(d => d.id === inviteForm.departmentId)?.name,
+      department_name: departments.find(d => d.id === inviteForm.departmentId)?.name,
       departmentId: inviteForm.departmentId || undefined,
       status: 'invited',
       invitedAt: new Date().toISOString(),
-      invitedBy: profile?.name || 'システム'
+      invitedBy: profile?.full_name || 'システム'
     };
 
     setTeamUsers(prev => [...prev, newUser]);
     setInviteForm({
       email: '',
       role: 'general_user',
-      department: '',
+      department_name: '',
       departmentId: '',
       customMessage: ''
     });
@@ -337,7 +337,7 @@ function UserManagement({ onNavigate }: UserManagementProps) {
                           <tr key={user.id} className="border-b border-white/20 hover:bg-white/20 transition-colors">
                             <td className="py-4 px-6">
                               <div>
-                                <p className="font-medium text-slate-800">{user.name}</p>
+                                <p className="font-medium text-slate-800">{user.full_name}</p>
                                 <p className="text-sm text-slate-600">{user.email}</p>
                               </div>
                             </td>
@@ -346,7 +346,7 @@ function UserManagement({ onNavigate }: UserManagementProps) {
                                 {getRoleLabel(user.role)}
                               </span>
                             </td>
-                            <td className="py-4 px-6 text-slate-700">{user.department || '未設定'}</td>
+                            <td className="py-4 px-6 text-slate-700">{user.department_name || '未設定'}</td>
                             <td className="py-4 px-6">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
                                 {getStatusLabel(user.status)}
@@ -447,7 +447,7 @@ function UserManagement({ onNavigate }: UserManagementProps) {
                     onChange={(e) => setInviteForm(prev => ({ 
                       ...prev, 
                       departmentId: e.target.value,
-                      department: departments.find(d => d.id === e.target.value)?.name || ''
+                      department_name: departments.find(d => d.id === e.target.value)?.name || ''
                     }))}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-400"
                     required={inviteForm.role === 'department_admin'}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, Building, Phone, Briefcase, CheckCircle } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface OnboardingProps {
   onNavigate: (view: string) => void;
@@ -28,10 +28,10 @@ function Onboarding({ onNavigate, onComplete }: OnboardingProps) {
     }
 
     const result = await updateProfile({
-      name: formData.fullName,
-      company: formData.companyName,
+      full_name: formData.fullName,
+      company_name: formData.companyName,
       position: formData.position,
-      phone: formData.phone
+      phone_number: formData.phone
     });
 
     if (result.success) {

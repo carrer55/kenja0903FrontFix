@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, Search, Filter, Calendar, User, Eye, Clock, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import { useApplications } from '../hooks/useApplications';
+import { useAuth } from '../contexts/AuthContext';
 
 interface AdminApplicationListProps {
   onNavigate: (view: string) => void;
@@ -13,7 +15,7 @@ interface Application {
   category: 'application' | 'settlement';
   title: string;
   applicant: string;
-  department: string;
+  department_name: string;
   amount: number;
   submittedDate: string;
   status: 'pending' | 'approved' | 'rejected' | 'on_hold';
@@ -30,83 +32,35 @@ function AdminApplicationList({ onNavigate }: AdminApplicationListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
-  // ローカルストレージから選択されたカテゴリとステータスを取得
-  const selectedCategory = localStorage.getItem('adminSelectedCategory') as 'application' | 'settlement' || 'application';
-  const selectedStatus = localStorage.getItem('adminSelectedStatus') as 'pending' | 'approved' || 'pending';
+  const { applications } = useApplications();
+  const { user } = useAuth();
 
-  const applications: Application[] = [
-    {
-      id: 'BT-2024-001',
-      type: 'business-trip',
-      category: 'application',
-      title: '東京出張申請',
-      applicant: '田中太郎',
-      department: '営業部',
-      amount: 52500,
-      submittedDate: '2024-07-20',
-      status: 'pending',
-      approver: '佐藤部長',
-      purpose: 'クライアント訪問および新規開拓営業',
-      startDate: '2024-07-25',
-      endDate: '2024-07-27',
-      location: '東京都港区',
-      daysWaiting: 3
-    },
-    {
-      id: 'BT-2024-002',
-      type: 'business-trip',
-      category: 'application',
-      title: '大阪出張申請',
-      applicant: '鈴木次郎',
-      department: '開発部',
-      amount: 35000,
-      submittedDate: '2024-07-15',
-      status: 'approved',
-      approver: '山田経理',
-      purpose: '支社会議参加',
-      startDate: '2024-07-20',
-      endDate: '2024-07-21',
-      location: '大阪府大阪市'
-    },
-    {
-      id: 'EX-2024-001',
-      type: 'expense',
-      category: 'application',
-      title: '交通費申請',
-      applicant: '佐藤花子',
-      department: '総務部',
-      amount: 12800,
-      submittedDate: '2024-07-18',
-      status: 'pending',
-      approver: '田中部長',
-      daysWaiting: 5
-    },
-    {
-      id: 'ST-2024-001',
-      type: 'business-trip',
-      category: 'settlement',
-      title: '東京出張精算',
-      applicant: '高橋美咲',
-      department: '企画部',
-      amount: 48500,
-      submittedDate: '2024-07-10',
-      status: 'pending',
-      approver: '鈴木取締役',
-      daysWaiting: 13
-    },
-    {
-      id: 'ST-2024-002',
-      type: 'expense',
-      category: 'settlement',
-      title: '会議費精算',
-      applicant: '伊藤健一',
-      department: '営業部',
-      amount: 8500,
-      submittedDate: '2024-07-05',
-      status: 'approved',
-      approver: '佐藤部長'
-    }
-  ];
+  // URLパラメータから選択されたカテゴリとステータスを取得
+  const selectedCategory = new URLSearchParams(window.location.search).get('category') as 'application' | 'settlement' || 'application';
+  const selectedStatus = new URLSearchParams(window.location.search).get('status') as 'pending' | 'approved' || 'pending';
+
+  // SupabaseデータをApplication形式に変換
+  const formattedApplications: Application[] = applications.map(app => ({
+    id: app.id,
+    type: app.type === 'business_trip_request' ? 'business-trip' : 'expense',
+    category: 'application',
+    title: app.title,
+    applicant: app.applicant_name || '',
+    department_name: app.department_name || '',
+    amount: app.total_amount || 0,
+    submittedDate: app.submitted_at || app.created_at,
+    status: app.status as 'pending' | 'approved' | 'rejected' | 'on_hold',
+    approver: app.approver_name || '',
+    purpose: app.metadata?.purpose,
+    startDate: app.metadata?.start_date,
+    endDate: app.metadata?.end_date,
+    location: app.metadata?.location,
+    visitTarget: app.metadata?.visit_target,
+    companions: app.metadata?.companions,
+    daysWaiting: app.days_waiting || 0
+  }));
+
+  // formattedApplicationsを使用
 
   const departments = ['営業部', '総務部', '開発部', '企画部', '経理部'];
 
@@ -163,13 +117,9 @@ function AdminApplicationList({ onNavigate }: AdminApplicationListProps) {
     return `${categoryLabel} - ${statusLabel}`;
   };
 
-  const filteredApplications = applications.filter(app => {
+  const filteredApplications = formattedApplications.filter(app => {
     // 部門管理者の場合は自部署のみ表示
-    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-    const currentUserRole = userProfile.role;
-    const userDepartment = userProfile.departmentName;
-    
-    if (currentUserRole === 'department_admin' && userDepartment && app.department !== userDepartment) {
+    if (user?.role === 'department_admin' && user?.department_name && app.department_name !== user.department_name) {
       return false;
     }
     
@@ -178,14 +128,13 @@ function AdminApplicationList({ onNavigate }: AdminApplicationListProps) {
     const matchesSearch = app.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          app.applicant.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          app.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = departmentFilter === 'all' || app.department === departmentFilter;
+    const matchesDepartment = departmentFilter === 'all' || app.department_name === departmentFilter;
     
     return matchesCategory && matchesStatus && matchesSearch && matchesDepartment;
   });
 
   const handleApplicationClick = (applicationId: string) => {
-    localStorage.setItem('adminSelectedApplication', applicationId);
-    onNavigate('admin-application-detail');
+    onNavigate(`admin-application-detail?id=${applicationId}`);
   };
 
   return (
@@ -305,7 +254,7 @@ function AdminApplicationList({ onNavigate }: AdminApplicationListProps) {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600 mb-3">
                               <div className="flex items-center space-x-2">
                                 <User className="w-4 h-4" />
-                                <span>{app.applicant} ({app.department})</span>
+                                <span>{app.applicant} ({app.department_name})</span>
                               </div>
                               <div className="flex items-center space-x-2">
                                 <Calendar className="w-4 h-4" />

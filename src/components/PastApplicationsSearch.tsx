@@ -12,7 +12,7 @@ interface Application {
   type: 'business-trip' | 'expense' | 'business-report' | 'expense-report';
   title: string;
   applicant: string;
-  department: string;
+  department_name: string;
   amount?: number;
   submittedDate: string;
   status: 'draft' | 'submitted' | 'approved' | 'rejected';
@@ -37,7 +37,7 @@ function PastApplicationsSearch({ onNavigate }: PastApplicationsSearchProps) {
       type: 'business-trip',
       title: '東京出張申請',
       applicant: '田中太郎',
-      department: '営業部',
+      department_name: '営業部',
       amount: 52500,
       submittedDate: '2024-07-20',
       status: 'approved',
@@ -50,7 +50,7 @@ function PastApplicationsSearch({ onNavigate }: PastApplicationsSearchProps) {
       type: 'business-report',
       title: '東京出張報告書',
       applicant: '田中太郎',
-      department: '営業部',
+      department_name: '営業部',
       submittedDate: '2024-07-28',
       status: 'submitted',
       period: { start: '2024-07-25', end: '2024-07-27' },
@@ -62,7 +62,7 @@ function PastApplicationsSearch({ onNavigate }: PastApplicationsSearchProps) {
       type: 'expense',
       title: '交通費・宿泊費精算',
       applicant: '佐藤花子',
-      department: '総務部',
+      department_name: '総務部',
       amount: 12800,
       submittedDate: '2024-07-18',
       status: 'approved'
@@ -72,7 +72,7 @@ function PastApplicationsSearch({ onNavigate }: PastApplicationsSearchProps) {
       type: 'expense-report',
       title: '東京出張経費精算書',
       applicant: '田中太郎',
-      department: '営業部',
+      department_name: '営業部',
       amount: 42000,
       submittedDate: '2024-07-30',
       status: 'draft',
@@ -85,7 +85,7 @@ function PastApplicationsSearch({ onNavigate }: PastApplicationsSearchProps) {
       type: 'business-trip',
       title: '大阪出張申請',
       applicant: '鈴木次郎',
-      department: '開発部',
+      department_name: '開発部',
       amount: 35000,
       submittedDate: '2024-07-15',
       status: 'rejected',
@@ -155,7 +155,7 @@ function PastApplicationsSearch({ onNavigate }: PastApplicationsSearchProps) {
                          app.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === 'all' || app.type === typeFilter;
     const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
-    const matchesDepartment = departmentFilter === 'all' || app.department === departmentFilter;
+    const matchesDepartment = departmentFilter === 'all' || app.department_name === departmentFilter;
     
     let matchesDate = true;
     if (dateRange.start && dateRange.end) {
@@ -321,7 +321,7 @@ function PastApplicationsSearch({ onNavigate }: PastApplicationsSearchProps) {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600 mb-3">
                               <div className="flex items-center space-x-2">
                                 <User className="w-4 h-4" />
-                                <span>{app.applicant} ({app.department})</span>
+                                <span>{app.applicant} ({app.department_name})</span>
                               </div>
                               <div className="flex items-center space-x-2">
                                 <Calendar className="w-4 h-4" />

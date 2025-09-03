@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle, XCircle, AlertTriangle, User, Calendar, MapPin, Building, MessageSquare, Clock } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import { useApplications } from '../hooks/useApplications';
+import { useNotifications } from '../hooks/useNotifications';
 
 interface AdminApplicationDetailProps {
   onNavigate: (view: string) => void;
@@ -13,7 +15,7 @@ interface ApplicationData {
   category: 'application' | 'settlement';
   title: string;
   applicant: string;
-  department: string;
+  department_name: string;
   amount: number;
   submittedDate: string;
   status: 'pending' | 'approved' | 'rejected' | 'on_hold';
@@ -43,41 +45,49 @@ function AdminApplicationDetail({ onNavigate }: AdminApplicationDetailProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [applicationData, setApplicationData] = useState<ApplicationData | null>(null);
 
-  // ローカルストレージから選択された申請IDを取得
-  const selectedApplicationId = localStorage.getItem('adminSelectedApplication') || '';
+  const { applications, updateApplication } = useApplications();
+  const { createApprovalNotification } = useNotifications();
 
-  // サンプルデータ（実際の実装では、selectedApplicationIdに基づいてデータを取得）
-  const applicationData: ApplicationData = {
-    id: 'BT-2024-001',
-    type: 'business-trip',
-    category: 'application',
-    title: '東京出張申請',
-    applicant: '田中太郎',
-    department: '営業部',
-    amount: 52500,
-    submittedDate: '2024-07-20',
-    status: 'pending',
-    approver: '佐藤部長',
-    purpose: 'クライアント訪問および新規開拓営業',
-    startDate: '2024-07-25',
-    endDate: '2024-07-27',
-    location: '東京都港区',
-    visitTarget: '株式会社サンプル',
-    companions: '田中部長',
-    daysWaiting: 3,
-    details: {
-      dailyAllowance: 15000,
-      transportation: 22500,
-      accommodation: 15000
+  // URLパラメータまたはpropsから選択された申請IDを取得
+  const selectedApplicationId = new URLSearchParams(window.location.search).get('id') || '';
+
+  useEffect(() => {
+    if (selectedApplicationId && applications.length > 0) {
+      const app = applications.find(a => a.id === selectedApplicationId);
+      if (app) {
+        setApplicationData({
+          id: app.id,
+          type: app.type === 'business_trip_request' ? 'business-trip' : 'expense',
+          category: 'application',
+          title: app.title,
+          applicant: app.applicant_name || '',
+          department_name: app.department_name || '',
+          amount: app.total_amount || 0,
+          submittedDate: app.submitted_at || app.created_at,
+          status: app.status as 'pending' | 'approved' | 'rejected' | 'on_hold',
+          approver: app.approver_name || '',
+          purpose: app.metadata?.purpose,
+          startDate: app.metadata?.start_date,
+          endDate: app.metadata?.end_date,
+          location: app.metadata?.location,
+          visitTarget: app.metadata?.visit_target,
+          companions: app.metadata?.companions,
+          daysWaiting: app.days_waiting || 0,
+          details: app.metadata?.details
+        });
+      }
     }
-  };
+  }, [selectedApplicationId, applications]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const handleApprovalAction = async (action: 'approved' | 'rejected' | 'on_hold') => {
+    if (!applicationData) return;
+    
     if (action !== 'approved' && !comment.trim()) {
       alert('否認または保留の場合は、コメントを入力してください。');
       return;
@@ -85,24 +95,28 @@ function AdminApplicationDetail({ onNavigate }: AdminApplicationDetailProps) {
 
     setIsSubmitting(true);
     
-    // 実際の実装では、ここでAPIを呼び出してステータスを更新
-    // ローカル実装では、ローカルストレージのデータを更新
-    setTimeout(() => {
+    try {
       const actionLabel = action === 'approved' ? '承認' : action === 'rejected' ? '否認' : '保留';
       
-      // ローカルストレージのアプリケーションデータを更新（実際の実装ではAPI呼び出し）
-      const applications = JSON.parse(localStorage.getItem('adminApplications') || '[]');
-      const updatedApplications = applications.map((app: any) => 
-        app.id === applicationData.id 
-          ? { ...app, status: action, approvedAt: new Date().toISOString(), approverComment: comment }
-          : app
-      );
-      localStorage.setItem('adminApplications', JSON.stringify(updatedApplications));
+      // Supabaseで申請ステータスを更新
+      await updateApplication(applicationData.id, {
+        status: action,
+        approved_at: action === 'approved' ? new Date().toISOString() : null,
+        rejection_reason: action === 'rejected' ? comment : null,
+        current_approver_id: null // 承認完了
+      });
+
+      // 通知を作成
+      await createApprovalNotification(applicationData.id, action);
       
       alert(`申請を${actionLabel}しました。`);
-      setIsSubmitting(false);
       onNavigate('admin-application-list');
-    }, 1000);
+    } catch (error) {
+      console.error('Error updating application:', error);
+      alert('申請の更新に失敗しました。');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -147,6 +161,19 @@ function AdminApplicationDetail({ onNavigate }: AdminApplicationDetailProps) {
   const getCategoryLabel = (category: string) => {
     return category === 'application' ? '申請' : '精算';
   };
+
+  if (!applicationData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-navy-600 to-navy-800 flex items-center justify-center animate-pulse">
+            <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <p className="text-slate-600">申請データを読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden">
@@ -206,7 +233,7 @@ function AdminApplicationDetail({ onNavigate }: AdminApplicationDetailProps) {
                       <User className="w-5 h-5 text-slate-500" />
                       <div>
                         <p className="text-sm text-slate-600">申請者</p>
-                        <p className="font-medium text-slate-800">{applicationData.applicant} ({applicationData.department})</p>
+                        <p className="font-medium text-slate-800">{applicationData.applicant} ({applicationData.department_name})</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">

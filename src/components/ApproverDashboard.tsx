@@ -13,7 +13,7 @@ interface Application {
   type: 'business-trip' | 'expense';
   title: string;
   applicant: string;
-  department: string;
+  department_name: string;
   amount: number;
   submittedDate: string;
   status: 'pending' | 'on_hold' | 'approved';
@@ -34,7 +34,7 @@ function ApproverDashboard({ onNavigate, onShowDetail }: ApproverDashboardProps)
       type: 'business-trip',
       title: '東京出張申請',
       applicant: '田中太郎',
-      department: '営業部',
+      department_name: '営業部',
       amount: 52500,
       submittedDate: '2024-07-20',
       status: 'pending',
@@ -46,7 +46,7 @@ function ApproverDashboard({ onNavigate, onShowDetail }: ApproverDashboardProps)
       type: 'expense',
       title: '交通費・宿泊費精算',
       applicant: '佐藤花子',
-      department: '総務部',
+      department_name: '総務部',
       amount: 12800,
       submittedDate: '2024-07-18',
       status: 'pending',
@@ -58,7 +58,7 @@ function ApproverDashboard({ onNavigate, onShowDetail }: ApproverDashboardProps)
       type: 'business-trip',
       title: '大阪出張申請',
       applicant: '鈴木次郎',
-      department: '開発部',
+      department_name: '開発部',
       amount: 35000,
       submittedDate: '2024-07-15',
       status: 'on_hold',
@@ -70,7 +70,7 @@ function ApproverDashboard({ onNavigate, onShowDetail }: ApproverDashboardProps)
       type: 'expense',
       title: '会議費精算',
       applicant: '高橋美咲',
-      department: '企画部',
+      department_name: '企画部',
       amount: 8500,
       submittedDate: '2024-07-10',
       status: 'approved',
@@ -91,7 +91,7 @@ function ApproverDashboard({ onNavigate, onShowDetail }: ApproverDashboardProps)
     const matchesSearch = app.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          app.applicant.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          app.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = departmentFilter === 'all' || app.department === departmentFilter;
+    const matchesDepartment = departmentFilter === 'all' || app.department_name === departmentFilter;
     return matchesSearch && matchesDepartment;
   });
 
@@ -283,7 +283,7 @@ function ApproverDashboard({ onNavigate, onShowDetail }: ApproverDashboardProps)
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600 mb-3">
                               <div className="flex items-center space-x-2">
                                 <User className="w-4 h-4" />
-                                <span>{app.applicant} ({app.department})</span>
+                                <span>{app.applicant} ({app.department_name})</span>
                               </div>
                               <div className="flex items-center space-x-2">
                                 <Calendar className="w-4 h-4" />
