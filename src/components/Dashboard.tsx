@@ -27,6 +27,7 @@ import ApproverDashboard from './ApproverDashboard';
 import UserManagement from './UserManagement';
 import AdminApplicationList from './AdminApplicationList';
 import AdminApplicationDetail from './AdminApplicationDetail';
+import DepartmentManagement from './DepartmentManagement';
 import { useUserProfile } from './UserProfileProvider';
 
 function Dashboard() {
@@ -106,6 +107,8 @@ function Dashboard() {
         return <AdminApplicationList onNavigate={navigateToView} />;
       case 'admin-application-detail':
         return <AdminApplicationDetail onNavigate={navigateToView} />;
+      case 'department-management':
+        return <DepartmentManagement onNavigate={navigateToView} />;
       case 'application-detail':
         return applicationDetail ? (
           <ApplicationDetail 

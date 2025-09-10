@@ -84,7 +84,7 @@ class LocalAuth {
         position: '代表取締役',
         phone: '090-0000-0000',
         role: 'admin',
-        plan: 'Pro',
+        plan: 'Enterprise',
         departmentId: 'dept-000',
         departmentName: '経営企画部',
         createdAt: new Date().toISOString()
@@ -96,7 +96,7 @@ class LocalAuth {
         full_name: 'デモユーザー',
         position: '代表取締役',
         role: 'admin',
-        currentPlan: 'Pro'
+        currentPlan: 'Enterprise'
       }));
 
       this.authState = {

@@ -10,7 +10,7 @@ function TopBar({ onMenuClick, onNavigate }: TopBarProps) {
   // ユーザーのプラン情報を取得（実際の実装では、ユーザー情報から取得）
   const getCurrentPlan = () => {
     const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-    return userProfile.currentPlan || 'Pro'; // デフォルトはPro
+    return userProfile.currentPlan || 'Enterprise'; // デフォルトはEnterprise
   };
 
   const currentPlan = getCurrentPlan();
