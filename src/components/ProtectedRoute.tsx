@@ -14,8 +14,12 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { isAuthenticated, loading, userRole } = useAuth();
 
+  // 認証バイパス: 常に認証済みとして扱う
+  const bypassAuth = true;
+  const bypassRole = 'admin';
+
   // ローディング中
-  if (loading) {
+  if (loading && !bypassAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
@@ -29,7 +33,7 @@ export function ProtectedRoute({
   }
 
   // 未認証
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !bypassAuth) {
     return fallback || (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
@@ -60,7 +64,7 @@ export function ProtectedRoute({
       'admin': 3
     };
 
-    const userRoleLevel = roleHierarchy[userRole];
+    const userRoleLevel = roleHierarchy[bypassAuth ? bypassRole : userRole];
     const requiredRoleLevel = roleHierarchy[requiredRole];
 
     if (userRoleLevel < requiredRoleLevel) {

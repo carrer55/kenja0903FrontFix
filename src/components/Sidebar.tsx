@@ -54,11 +54,11 @@ function Sidebar({ isOpen, onClose, onNavigate, currentView = 'dashboard' }: Sid
   const shouldShowMenuItem = (label: string): boolean => {
     switch (label) {
       case '節税シミュレーション':
-        return hasPermission('tax_simulation');
+        return true; // 認証バイパス時は全て表示
       case '出張規定管理':
-        return hasPermission('travel_regulation_management');
+        return true; // 認証バイパス時は全て表示
       case '部署管理':
-        return user?.plan === 'Enterprise' && userRole === 'admin';
+        return true; // 認証バイパス時は全て表示
       default:
         return true;
     }

@@ -32,14 +32,50 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    session: null,
-    isAuthenticated: false,
-    loading: true,
+    user: {
+      id: 'admin-bypass-001',
+      email: 'admin@kenjano-seisan.com',
+      full_name: '管理者 太郎',
+      company_name: '株式会社賢者の精算',
+      position: '代表取締役',
+      phone_number: '03-1234-5678',
+      role: 'admin',
+      plan: 'Enterprise',
+      department_id: 'dept-admin-001',
+      department_name: '経営企画部',
+      invited_by: null,
+      last_login_at: new Date().toISOString(),
+      status: 'active',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    session: {
+      access_token: 'mock-access-token',
+      refresh_token: 'mock-refresh-token',
+      expires_at: Date.now() / 1000 + 3600,
+      token_type: 'bearer',
+      user: {
+        id: 'admin-bypass-001',
+        email: 'admin@kenjano-seisan.com',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_confirmed_at: new Date().toISOString(),
+        user_metadata: {},
+        app_metadata: {},
+        aud: 'authenticated',
+        role: 'authenticated'
+      }
+    } as any,
+    isAuthenticated: true,
+    loading: false,
     error: undefined
   });
 
   useEffect(() => {
+    // 認証バイパス時は初期化処理をスキップ
+    console.log('Auth bypass enabled - skipping initialization');
+    return;
+    
     // メール確認URLの処理
     const handleEmailConfirmation = async (): Promise<boolean> => {
       console.log(`🚀 [handleEmailConfirmation] Starting email confirmation process...`);

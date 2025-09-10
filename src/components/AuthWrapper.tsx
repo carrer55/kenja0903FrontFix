@@ -100,7 +100,8 @@ function AuthWrapper() {
     );
   }
 
-  if (isAuthenticated) {
+  // 認証バイパス: 常にダッシュボードを表示
+  if (true) {
     return (
       <ProtectedRoute>
         <Dashboard />
