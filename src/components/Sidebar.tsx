@@ -20,7 +20,6 @@ const menuItems = [
   { icon: FolderOpen, label: '出張精算', active: false },
   { icon: Calculator, label: '節税シミュレーション', active: false },
   { icon: Settings, label: '出張規定管理', active: false },
-  { icon: Users, label: '部署管理', active: false },
   { icon: User, label: 'マイページ（設定）', active: false },
 ];
 
@@ -108,9 +107,6 @@ function Sidebar({ isOpen, onClose, onNavigate, currentView = 'dashboard' }: Sid
             } else if (item.label === 'マイページ（設定）') {
               clickHandler = () => handleMenuClick('my-page');
               isActive = currentView === 'my-page';
-            } else if (item.label === '部署管理') {
-              clickHandler = () => handleMenuClick('department-management');
-              isActive = currentView === 'department-management';
             } else if (item.label === 'ホーム') {
               isActive = currentView === 'dashboard';
             }
