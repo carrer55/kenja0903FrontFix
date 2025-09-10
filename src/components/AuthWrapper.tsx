@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { ProtectedRoute } from './ProtectedRoute';
+import { useAuth } from '../hooks/useAuth';
 import LandingPage from './LandingPage';
 import Login from './auth/Login';
 import Register from './auth/Register';
 import RegisterSuccess from './auth/RegisterSuccess';
 import EmailConfirmed from './auth/EmailConfirmed';
-import EmailConfirmation from './auth/EmailConfirmation';
-import RegistrationComplete from './auth/RegistrationComplete';
 import Onboarding from './auth/Onboarding';
 import PasswordReset from './auth/PasswordReset';
 import Dashboard from './Dashboard';
@@ -22,38 +19,7 @@ import ContactPage from './ContactPage';
 function AuthWrapper() {
   const [currentView, setCurrentView] = useState<string>('landing');
   const [contactInquiryType, setContactInquiryType] = useState<string>('');
-  const { isAuthenticated, loading, resetAuthState } = useAuth();
-
-  // URLパラメータの処理
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const view = urlParams.get('view');
-    const type = urlParams.get('type');
-    const token = urlParams.get('token');
-    const hash = urlParams.get('hash');
-    
-    // メール確認のURLパラメータがある場合は、クリーンアップしない
-    if (type === 'signup' && (token || hash)) {
-      console.log('Email confirmation URL detected, not cleaning up URL params');
-      console.log('Email confirmation URL details:', {
-        type,
-        hasToken: !!token,
-        hasHash: !!hash,
-        tokenLength: token?.length,
-        hashLength: hash?.length
-      });
-      // メール確認処理中は読み込み状態を維持
-      return;
-    }
-    
-    if (view) {
-      console.log('Setting view from URL params:', view);
-      setCurrentView(view);
-      // メール確認以外のURLパラメータのみクリーンアップ
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, []);
+  const { isAuthenticated, loading } = useAuth();
 
   const handleLoginSuccess = () => {
     // ログイン成功時の処理は useAuth フックで自動的に処理される
@@ -74,13 +40,6 @@ function AuthWrapper() {
     setContactInquiryType(inquiryType || '');
     setCurrentView('contact');
   };
-
-  const resetToLanding = () => {
-    console.log('Resetting to landing page');
-    resetAuthState();
-    setCurrentView('landing');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
@@ -88,25 +47,14 @@ function AuthWrapper() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-navy-600 to-navy-800 flex items-center justify-center animate-pulse">
             <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           </div>
-          <p className="text-slate-600 mb-4">読み込み中...</p>
-          <button
-            onClick={resetToLanding}
-            className="px-4 py-2 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition-colors"
-          >
-            TOPに戻る
-          </button>
+          <p className="text-slate-600">読み込み中...</p>
         </div>
       </div>
     );
   }
 
-  // 認証バイパス: 常にダッシュボードを表示
-  if (true) {
-    return (
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    );
+  if (isAuthenticated) {
+    return <Dashboard />;
   }
 
   switch (currentView) {
@@ -134,10 +82,6 @@ function AuthWrapper() {
       return <RegisterSuccess onNavigate={navigateToView} />;
     case 'email-confirmed':
       return <EmailConfirmed onNavigate={navigateToView} />;
-    case 'email-confirmation':
-      return <EmailConfirmation onNavigate={navigateToView} />;
-    case 'registration-complete':
-      return <RegistrationComplete onNavigate={navigateToView} />;
     case 'onboarding':
       return <Onboarding onNavigate={navigateToView} onComplete={handleOnboardingComplete} />;
     case 'password-reset':

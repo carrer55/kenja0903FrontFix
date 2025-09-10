@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Calendar, MapPin, Upload, Calculator, Save } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
-import { useApplications } from '../hooks/useApplications';
-import { useAuth } from '../contexts/AuthContext';
 
 interface BusinessTripApplicationProps {
   onNavigate: (view: 'dashboard' | 'business-trip' | 'expense') => void;
@@ -11,8 +9,6 @@ interface BusinessTripApplicationProps {
 
 function BusinessTripApplication({ onNavigate }: BusinessTripApplicationProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { createApplication } = useApplications();
-  const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     purpose: '',
@@ -105,40 +101,12 @@ function BusinessTripApplication({ onNavigate }: BusinessTripApplicationProps) {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user) {
-      alert('ユーザー情報が取得できません');
-      return;
-    }
-
-    try {
-      // 出張申請データをSupabaseに保存
-      const applicationData = {
-        title: formData.title,
-        type: 'business_trip_request' as const,
-        status: 'draft' as const,
-        total_amount: formData.estimatedExpenses.total,
-        priority: 'medium' as const,
-        metadata: {
-          purpose: formData.purpose,
-          start_date: formData.startDate,
-          end_date: formData.endDate,
-          location: formData.location,
-          visit_target: formData.visitTarget,
-          companions: formData.companions,
-          estimated_expenses: formData.estimatedExpenses
-        }
-      };
-
-      await createApplication(applicationData);
-      alert('出張申請が保存されました！');
-      onNavigate('dashboard');
-    } catch (error) {
-      console.error('Error creating application:', error);
-      alert('申請の保存に失敗しました');
-    }
+    // ここで申請データを送信
+    console.log('出張申請データ:', formData);
+    alert('出張申請が送信されました！');
+    onNavigate('dashboard');
   };
 
   const onBack = () => {

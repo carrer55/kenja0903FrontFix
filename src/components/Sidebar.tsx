@@ -8,10 +8,10 @@ import {
   Settings, 
   LogOut,
   User,
-  X,
-  Building
+  X
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { auth } from '../lib/auth';
+import { useUserProfile } from './UserProfileProvider';
 
 const menuItems = [
   { icon: Home, label: 'ホーム', active: true },
@@ -31,14 +31,7 @@ interface SidebarProps {
 }
 
 function Sidebar({ isOpen, onClose, onNavigate, currentView = 'dashboard' }: SidebarProps) {
-  const { user, userRole, logout } = useAuth();
-
-  const hasPermission = (permission: string) => {
-    if (userRole === 'admin') return true;
-    if (permission === 'user_management' && userRole === 'department_admin') return true;
-    if (permission === 'plan_management' && userRole === 'admin') return true;
-    return false;
-  };
+  const { hasPermission, userRole } = useUserProfile();
 
   const handleMenuClick = (view: string) => {
     if (onNavigate) {
@@ -54,11 +47,9 @@ function Sidebar({ isOpen, onClose, onNavigate, currentView = 'dashboard' }: Sid
   const shouldShowMenuItem = (label: string): boolean => {
     switch (label) {
       case '節税シミュレーション':
-        return true; // 認証バイパス時は全て表示
+        return hasPermission('tax_simulation');
       case '出張規定管理':
-        return true; // 認証バイパス時は全て表示
-      case '部署管理':
-        return true; // 認証バイパス時は全て表示
+        return hasPermission('travel_regulation_management');
       default:
         return true;
     }
@@ -116,9 +107,6 @@ function Sidebar({ isOpen, onClose, onNavigate, currentView = 'dashboard' }: Sid
             } else if (item.label === 'マイページ（設定）') {
               clickHandler = () => handleMenuClick('my-page');
               isActive = currentView === 'my-page';
-            } else if (item.label === '部署管理') {
-              clickHandler = () => handleMenuClick('department-management');
-              isActive = currentView === 'department-management';
             } else if (item.label === 'ホーム') {
               isActive = currentView === 'dashboard';
             }
@@ -151,16 +139,33 @@ function Sidebar({ isOpen, onClose, onNavigate, currentView = 'dashboard' }: Sid
             </div>
             <div>
               <p className="text-slate-800 text-sm font-medium" id="sidebar-user-name">
-                {user?.full_name || 'ユーザー'}
+                {(() => {
+                  const demoMode = localStorage.getItem('demoMode');
+                  if (demoMode === 'true') {
+                    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                    return userProfile.full_name || 'デモユーザー';
+                  }
+                  // 実際のユーザーの場合はローカルストレージから取得
+                  const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                  return userProfile.full_name || 'ユーザー';
+                })()}
               </p>
               <p className="text-slate-600 text-xs" id="sidebar-user-position">
-                {user?.position || '一般職'}
+                {(() => {
+                  const demoMode = localStorage.getItem('demoMode');
+                  if (demoMode === 'true') {
+                    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                    return userProfile.position || '代表取締役';
+                  }
+                  const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                  return userProfile.position || '一般職';
+                })()}
               </p>
             </div>
           </div>
           <button 
-            onClick={async () => {
-              await logout();
+            onClick={() => {
+              auth.logout();
               window.location.reload();
             }}
             className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-white/30 hover:bg-white/50 rounded-lg border border-white/40 transition-all duration-200 backdrop-blur-sm hover:shadow-lg"

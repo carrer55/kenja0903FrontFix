@@ -3,8 +3,6 @@ import StatsCards from './StatsCards';
 import QuickActions from './QuickActions';
 import RecentApplications from './RecentApplications';
 import PostTripNotification from './PostTripNotification';
-import { useAuth } from '../contexts/AuthContext';
-import { useApplications } from '../hooks/useApplications';
 
 interface MainContentProps {
   onNavigate: (view: string) => void;
@@ -13,32 +11,37 @@ interface MainContentProps {
 
 function MainContent({ onNavigate, onShowDetail }: MainContentProps) {
   const [showPostTripNotification, setShowPostTripNotification] = React.useState(true);
-  const { userRole } = useAuth();
-  const { applications } = useApplications();
   
-  const isAdmin = userRole === 'admin' || userRole === 'department_admin';
+  // ユーザーの役割を取得（実際の実装では、ユーザー情報から取得）
+  const getUserRole = () => {
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    return userProfile.role || 'user'; // デフォルトは一般ユーザー
+  };
 
-  // 出張終了後の通知判定（Supabaseデータから取得）
-  const completedTrip = applications.find(app => 
-    app.type === 'business_trip_request' && 
-    app.status === 'completed' &&
-    new Date(app.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 過去7日以内
-  );
+  const userRole = getUserRole();
+  const isAdmin = userRole === 'admin' || userRole === '管理者';
+
+  // 出張終了後の通知判定（サンプルデータ）
+  const completedTrip = {
+    id: 'BT-2024-001',
+    title: '東京出張',
+    endDate: '2024-07-27'
+  };
 
   const handleCreateReport = () => {
-    if (completedTrip) {
-      onNavigate('document-editor');
-      setShowPostTripNotification(false);
-    }
+    localStorage.setItem('editingBusinessTripId', completedTrip.id);
+    localStorage.setItem('editingDocumentType', 'business-report');
+    onNavigate('document-editor');
+    setShowPostTripNotification(false);
   };
   return (
     <>
       {/* 出張終了後の通知 */}
-      {showPostTripNotification && completedTrip && (
+      {showPostTripNotification && (
         <PostTripNotification
           tripTitle={completedTrip.title}
           tripId={completedTrip.id}
-          endDate={completedTrip.created_at}
+          endDate={completedTrip.endDate}
           onCreateReport={handleCreateReport}
           onDismiss={() => setShowPostTripNotification(false)}
         />

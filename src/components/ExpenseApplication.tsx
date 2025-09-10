@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Save, Upload, Camera, FileText, Plus, Trash2, CheckCircle, Edit } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
-import { useApplications } from '../hooks/useApplications';
-import { useAuth } from '../contexts/AuthContext';
 
 interface ExpenseApplicationProps {
   onNavigate: (view: 'dashboard' | 'business-trip' | 'expense') => void;
@@ -28,8 +26,6 @@ interface ExpenseItem {
 
 function ExpenseApplication({ onNavigate }: ExpenseApplicationProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { createApplication } = useApplications();
-  const { user } = useAuth();
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [showOCRModal, setShowOCRModal] = useState(false);
   const [currentExpenseId, setCurrentExpenseId] = useState<string>('');
@@ -170,14 +166,9 @@ function ExpenseApplication({ onNavigate }: ExpenseApplicationProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user) {
-      alert('ユーザー情報が取得できません');
-      return;
-    }
-
     if (expenses.length === 0) {
       alert('経費項目を追加してください');
       return;
@@ -189,35 +180,9 @@ function ExpenseApplication({ onNavigate }: ExpenseApplicationProps) {
       return;
     }
 
-    try {
-      // 経費申請データをSupabaseに保存
-      const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-      
-      const applicationData = {
-        title: `経費申請 - ${new Date().toLocaleDateString()}`,
-        type: 'expense_request' as const,
-        status: 'draft' as const,
-        total_amount: totalAmount,
-        priority: 'medium' as const,
-        metadata: {
-          expense_items: expenses.map(expense => ({
-            category: expense.category,
-            date: expense.date,
-            amount: expense.amount,
-            description: expense.description,
-            store: expense.store,
-            ocr_result: expense.ocrResult
-          }))
-        }
-      };
-
-      await createApplication(applicationData);
-      alert('経費申請が保存されました！');
-      onNavigate('dashboard');
-    } catch (error) {
-      console.error('Error creating application:', error);
-      alert('申請の保存に失敗しました');
-    }
+    console.log('経費申請データ:', expenses);
+    alert('経費申請が送信されました！');
+    onNavigate('dashboard');
   };
 
   const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);

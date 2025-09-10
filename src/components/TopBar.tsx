@@ -1,6 +1,5 @@
 import React from 'react';
 import { Bell, HelpCircle, MessageCircle, User, Menu } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 interface TopBarProps {
   onMenuClick: () => void;
@@ -8,8 +7,13 @@ interface TopBarProps {
 }
 
 function TopBar({ onMenuClick, onNavigate }: TopBarProps) {
-  const { userPlan } = useAuth();
-  const currentPlan = userPlan;
+  // ユーザーのプラン情報を取得（実際の実装では、ユーザー情報から取得）
+  const getCurrentPlan = () => {
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    return userProfile.currentPlan || 'Pro'; // デフォルトはPro
+  };
+
+  const currentPlan = getCurrentPlan();
 
   return (
     <div className="h-16 backdrop-blur-xl bg-white/10 border-b border-white/20 flex items-center justify-between px-4 lg:px-6 shadow-xl relative overflow-hidden">

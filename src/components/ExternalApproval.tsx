@@ -16,7 +16,7 @@ function ExternalApproval({ applicationId, onComplete }: ExternalApprovalProps) 
     type: 'business-trip',
     title: '東京出張申請',
     applicant: '田中太郎',
-    department_name: '営業部',
+    department: '営業部',
     submittedDate: '2024-07-20',
     purpose: 'クライアント訪問および新規開拓営業',
     startDate: '2024-07-25',
@@ -73,7 +73,7 @@ function ExternalApproval({ applicationId, onComplete }: ExternalApprovalProps) 
                   <User className="w-5 h-5 text-slate-500" />
                   <div>
                     <p className="text-sm text-slate-600">申請者</p>
-                    <p className="font-medium text-slate-800">{applicationData.applicant} ({applicationData.department_name})</p>
+                    <p className="font-medium text-slate-800">{applicationData.applicant} ({applicationData.department})</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">

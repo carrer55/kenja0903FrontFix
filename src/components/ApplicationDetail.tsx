@@ -16,7 +16,7 @@ function ApplicationDetail({ onBack, type, applicationId }: ApplicationDetailPro
       status: '承認済み',
       statusColor: 'text-emerald-700 bg-emerald-100',
       applicant: '田中太郎',
-      department_name: '営業部',
+      department: '営業部',
       submittedDate: '2024-07-20',
       purpose: 'クライアント訪問および新規開拓営業',
       startDate: '2024-07-25',
@@ -36,7 +36,7 @@ function ApplicationDetail({ onBack, type, applicationId }: ApplicationDetailPro
       status: '待機中',
       statusColor: 'text-amber-700 bg-amber-100',
       applicant: '佐藤花子',
-      department_name: '総務部',
+      department: '総務部',
       submittedDate: '2024-07-18',
       totalAmount: 12800,
       items: [
@@ -107,7 +107,7 @@ function ApplicationDetail({ onBack, type, applicationId }: ApplicationDetailPro
                   </div>
                   <div>
                     <p className="text-slate-600">申請者</p>
-                    <p className="font-medium text-slate-800">{data.applicant} ({data.department_name})</p>
+                    <p className="font-medium text-slate-800">{data.applicant} ({data.department})</p>
                   </div>
                   <div>
                     <p className="text-slate-600">申請日</p>

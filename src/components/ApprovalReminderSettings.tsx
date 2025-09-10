@@ -92,16 +92,11 @@ function ApprovalReminderSettings({ onNavigate }: ApprovalReminderSettingsProps)
     }
   };
 
-  const handleSave = async () => {
-    // 設定をSupabaseに保存（実際の実装では適切なテーブルに保存）
-    try {
-      // ここでSupabaseに設定を保存する処理を実装
-      // 例: await supabase.from('approval_reminder_settings').upsert(...)
-      alert('リマインド設定を保存しました');
-    } catch (error) {
-      console.error('Error saving reminder settings:', error);
-      alert('設定の保存に失敗しました');
-    }
+  const handleSave = () => {
+    // 設定を保存
+    localStorage.setItem('approvalReminderRules', JSON.stringify(reminderRules));
+    localStorage.setItem('approvalReminderGlobalSettings', JSON.stringify(globalSettings));
+    alert('リマインド設定を保存しました');
   };
 
   const getRepeatIntervalLabel = (interval: number) => {

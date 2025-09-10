@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Save, Download, FileText, Calendar, MapPin, Calculator, Plus, Trash2, ArrowLeft, Eye } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
-import { useAuth } from '../contexts/AuthContext';
 
 interface TravelRegulationCreationProps {
   onNavigate: (view: string) => void;
@@ -55,7 +54,6 @@ function TravelRegulationCreation({ onNavigate }: TravelRegulationCreationProps)
   const [currentStep, setCurrentStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
   const [allowanceTab, setAllowanceTab] = useState<'domestic' | 'overseas'>('domestic');
-  const { user } = useAuth();
   
   const [data, setData] = useState<RegulationData>({
     companyInfo: {
@@ -194,45 +192,22 @@ function TravelRegulationCreation({ onNavigate }: TravelRegulationCreationProps)
     }));
   };
 
-  const handleSave = async () => {
-    if (!user) {
-      alert('ユーザーが認証されていません');
-      return;
-    }
-
-    try {
-      const regulationData = {
-        company_name: data.companyInfo.name,
-        company_address: data.companyInfo.address,
-        company_representative: data.companyInfo.representative,
-        established_date: data.companyInfo.establishedDate,
-        revision_number: data.companyInfo.revision,
-        version: `v${data.companyInfo.revision}.0`,
-        distance_threshold: data.basicSettings.distanceThreshold,
-        is_transportation_real_expense: data.basicSettings.transportationRealExpense,
-        is_accommodation_real_expense: data.basicSettings.accommodationRealExpense,
-        use_preparation_fee: data.basicSettings.usePreparationFee,
-        custom_articles: data.customArticles,
-        status: 'active' as const,
-        created_by: user.id
-      };
-
-      const { error } = await supabase
-        .from('travel_regulations')
-        .insert(regulationData);
-
-      if (error) {
-        console.error('Error saving regulation:', error);
-        alert('規程の保存に失敗しました');
-        return;
-      }
-
-      alert('出張規程が保存されました！');
-      onNavigate('travel-regulation-management');
-    } catch (error) {
-      console.error('Error saving regulation:', error);
-      alert('規程の保存に失敗しました');
-    }
+  const handleSave = () => {
+    const savedRegulations = JSON.parse(localStorage.getItem('travelRegulations') || '[]');
+    
+    const newRegulation = {
+      ...data,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      version: `v${data.companyInfo.revision}.0`,
+      status: 'active'
+    };
+    
+    savedRegulations.push(newRegulation);
+    localStorage.setItem('travelRegulations', JSON.stringify(savedRegulations));
+    
+    alert('出張規程が保存されました！');
+    onNavigate('travel-regulation-management');
   };
 
   const generateDocument = (format: 'word' | 'pdf') => {

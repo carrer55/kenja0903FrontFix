@@ -1,137 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TrendingUp, TrendingDown, ChevronDown, ChevronUp, BarChart3 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
 
 function StatsCards() {
   const [showEstimatedHistory, setShowEstimatedHistory] = useState(false);
   const [showActualHistory, setShowActualHistory] = useState(false);
-  const [statsData, setStatsData] = useState({
-    currentMonthEstimated: 0,
-    previousMonthEstimated: 0,
-    estimatedApplicationCount: 0,
-    currentMonthActual: 0,
-    previousMonthActual: 0,
-    actualApplicationCount: 0
-  });
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
 
-  useEffect(() => {
-    fetchStatsData();
-  }, [user]);
-
-  const fetchStatsData = async () => {
-    if (!user) return;
-
-    try {
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-      const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-      const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-
-      // 今月の申請データ（見込み）
-      const { data: currentMonthData, error: currentError } = await supabase
-        .from('applications')
-        .select('total_amount, status')
-        .eq('user_id', user.id)
-        .gte('created_at', new Date(currentYear, currentMonth, 1).toISOString())
-        .lt('created_at', new Date(currentYear, currentMonth + 1, 1).toISOString());
-
-      // 前月の申請データ
-      const { data: previousMonthData, error: previousError } = await supabase
-        .from('applications')
-        .select('total_amount, status')
-        .eq('user_id', user.id)
-        .gte('created_at', new Date(previousYear, previousMonth, 1).toISOString())
-        .lt('created_at', new Date(previousYear, previousMonth + 1, 1).toISOString());
-
-      if (currentError || previousError) {
-        console.error('Error fetching stats:', currentError || previousError);
-        
-        // テーブルが存在しない場合やアクセス権限がない場合はデフォルト値を設定
-        if (currentError?.code === 'PGRST205' || previousError?.code === 'PGRST205') {
-          console.log('Applications table not found, using default values');
-          setStatsData({
-            currentMonthEstimated: 0,
-            previousMonthEstimated: 0,
-            estimatedApplicationCount: 0,
-            currentMonthActual: 0,
-            previousMonthActual: 0,
-            actualApplicationCount: 0
-          });
-          setLoading(false);
-          return;
-        }
-        
-        // その他のエラーの場合はデフォルト値を設定
-        setStatsData({
-          currentMonthEstimated: 0,
-          previousMonthEstimated: 0,
-          estimatedApplicationCount: 0,
-          currentMonthActual: 0,
-          previousMonthActual: 0,
-          actualApplicationCount: 0
-        });
-        setLoading(false);
-        return;
-      }
-
-      // 集計計算
-      const currentMonthEstimated = currentMonthData?.reduce((sum, app) => sum + (app.total_amount || 0), 0) || 0;
-      const previousMonthEstimated = previousMonthData?.reduce((sum, app) => sum + (app.total_amount || 0), 0) || 0;
-      const estimatedApplicationCount = currentMonthData?.length || 0;
-      const actualApplicationCount = currentMonthData?.filter(app => app.status === 'approved').length || 0;
-      const currentMonthActual = currentMonthData?.filter(app => app.status === 'approved').reduce((sum, app) => sum + (app.total_amount || 0), 0) || 0;
-      const previousMonthActual = previousMonthData?.filter(app => app.status === 'approved').reduce((sum, app) => sum + (app.total_amount || 0), 0) || 0;
-
-      setStatsData({
-        currentMonthEstimated,
-        previousMonthEstimated,
-        estimatedApplicationCount,
-        currentMonthActual,
-        previousMonthActual,
-        actualApplicationCount
-      });
-    } catch (error) {
-      console.error('Error in fetchStatsData:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="mb-6 lg:mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="backdrop-blur-xl bg-white/20 rounded-xl p-6 lg:p-8 border border-white/30 shadow-xl">
-            <div className="animate-pulse">
-              <div className="h-6 bg-white/30 rounded mb-4"></div>
-              <div className="h-8 bg-white/30 rounded mb-2"></div>
-              <div className="h-4 bg-white/30 rounded"></div>
-            </div>
-          </div>
-          <div className="backdrop-blur-xl bg-white/20 rounded-xl p-6 lg:p-8 border border-white/30 shadow-xl">
-            <div className="animate-pulse">
-              <div className="h-6 bg-white/30 rounded mb-4"></div>
-              <div className="h-8 bg-white/30 rounded mb-2"></div>
-              <div className="h-4 bg-white/30 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const {
-    currentMonthEstimated,
-    previousMonthEstimated,
-    estimatedApplicationCount,
-    currentMonthActual,
-    previousMonthActual,
-    actualApplicationCount
-  } = statsData;
+  // 今月の精算見込みデータ
+  const currentMonthEstimated = 320000;
+  const previousMonthEstimated = 285000;
+  const estimatedApplicationCount = 12;
+  
+  // 今月の精算合計データ
+  const currentMonthActual = 285000;
+  const previousMonthActual = 245000;
+  const actualApplicationCount = 8;
   
   // 精算見込みの前月比計算
   const estimatedDifference = currentMonthEstimated - previousMonthEstimated;

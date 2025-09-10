@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { User, Settings, CreditCard, Bell, Users, HelpCircle, Edit, Save, Eye, EyeOff, Link } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
-import { useAuth } from '../contexts/AuthContext';
-import { useUserSettings } from '../hooks/useUserSettings';
-import { supabase, type AllowanceSettings, type NotificationSettings, type UserProfile as BaseUserProfile } from '../lib/supabase';
+import { useUserProfile } from './UserProfileProvider';
 
 interface MyPageProps {
   onNavigate: (view: string) => void;
 }
 
-// MyPageコンポーネント専用のUserProfile型（allowancesプロパティを追加）
-interface UserProfile extends BaseUserProfile {
+interface UserProfile {
+  name: string;
+  position: string;
+  email: string;
+  phone: string;
+  company: string;
+  department: string;
   allowances: {
     domestic: {
       dailyAllowance: number;
@@ -32,6 +35,13 @@ interface UserProfile extends BaseUserProfile {
   };
 }
 
+interface NotificationSettings {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  reminderTime: string;
+  approvalOnly: boolean;
+}
+
 function MyPage({ onNavigate }: MyPageProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
@@ -39,51 +49,40 @@ function MyPage({ onNavigate }: MyPageProps) {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const { user, userRole, userPlan, updateProfile } = useAuth();
-  const { allowanceSettings, notificationSettings, updateAllowanceSettings, updateNotificationSettings, createDefaultSettings } = useUserSettings();
+  const { hasPermission, userRole, userPlan } = useUserProfile();
   
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    id: user?.id || '',
-    full_name: user?.full_name || '',
-    position: user?.position || '',
-    email: user?.email || '',
-    phone_number: user?.phone_number || '',
-    company_name: user?.company_name || '',
-    department_name: user?.department_name || '',
-    role: user?.role || 'general_user',
-    plan: user?.plan || 'Free',
-    department_id: user?.department_id || null,
-    invited_by: user?.invited_by || null,
-    last_login_at: user?.last_login_at || null,
-    status: user?.status || 'active',
-    created_at: user?.created_at || '',
-    updated_at: user?.updated_at || '',
+    name: '山田太郎',
+    position: '代表取締役',
+    email: 'yamada@example.com',
+    phone: '090-1234-5678',
+    company: '株式会社サンプル',
+    department: '経営企画部',
     allowances: {
       domestic: {
-        dailyAllowance: allowanceSettings?.domestic_daily_allowance || 0,
-        accommodation: allowanceSettings?.domestic_accommodation || 0,
-        transportation: allowanceSettings?.domestic_transportation || 0,
-        accommodationDisabled: allowanceSettings?.domestic_accommodation_disabled || false,
-        transportationDisabled: allowanceSettings?.domestic_transportation_disabled || false
+        dailyAllowance: 5000,
+        accommodation: 10000,
+        transportation: 2000,
+        accommodationDisabled: false,
+        transportationDisabled: false
       },
       overseas: {
-        dailyAllowance: allowanceSettings?.overseas_daily_allowance || 0,
-        accommodation: allowanceSettings?.overseas_accommodation || 0,
-        transportation: allowanceSettings?.overseas_transportation || 0,
-        preparationFee: allowanceSettings?.overseas_preparation_fee || 0,
-        accommodationDisabled: allowanceSettings?.overseas_accommodation_disabled || false,
-        transportationDisabled: allowanceSettings?.overseas_transportation_disabled || false,
-        preparationFeeDisabled: allowanceSettings?.overseas_preparation_fee_disabled || false
+        dailyAllowance: 10000,
+        accommodation: 15000,
+        transportation: 3000,
+        preparationFee: 5000,
+        accommodationDisabled: false,
+        transportationDisabled: false,
+        preparationFeeDisabled: false
       }
     }
   });
 
-  // 通知設定の編集用状態
-  const [editingNotificationSettings, setEditingNotificationSettings] = useState<NotificationSettings>({
-    email_notifications: true,
-    push_notifications: true,
-    reminder_time: '09:00',
-    approval_only: false
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
+    emailNotifications: true,
+    pushNotifications: true,
+    reminderTime: '09:00',
+    approvalOnly: false
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -94,162 +93,30 @@ function MyPage({ onNavigate }: MyPageProps) {
 
   const [allowanceTab, setAllowanceTab] = useState<'domestic' | 'overseas'>('domestic');
 
-  // Supabaseデータで初期化
-  useEffect(() => {
-    if (user && allowanceSettings && notificationSettings) {
-      setUserProfile(prev => ({
-        ...prev,
-        id: user.id || '',
-        full_name: user.full_name || '',
-        position: user.position || '',
-        email: user.email || '',
-        phone_number: user.phone_number || '',
-        company_name: user.company_name || '',
-        department_name: user.department_name || '',
-        role: user.role || 'general_user',
-        plan: user.plan || 'Free',
-        department_id: user.department_id || null,
-        invited_by: user.invited_by || null,
-        last_login_at: user.last_login_at || null,
-        status: user.status || 'active',
-        created_at: user.created_at || '',
-        updated_at: user.updated_at || '',
-        allowances: {
-          domestic: {
-            dailyAllowance: allowanceSettings.domestic_daily_allowance || 0,
-            accommodation: allowanceSettings.domestic_accommodation || 0,
-            transportation: allowanceSettings.domestic_transportation || 0,
-            accommodationDisabled: allowanceSettings.domestic_accommodation_disabled || false,
-            transportationDisabled: allowanceSettings.domestic_transportation_disabled || false
-          },
-          overseas: {
-            dailyAllowance: allowanceSettings.overseas_daily_allowance || 0,
-            accommodation: allowanceSettings.overseas_accommodation || 0,
-            transportation: allowanceSettings.overseas_transportation || 0,
-            preparationFee: allowanceSettings.overseas_preparation_fee || 0,
-            accommodationDisabled: allowanceSettings.overseas_accommodation_disabled || false,
-            transportationDisabled: allowanceSettings.overseas_transportation_disabled || false,
-            preparationFeeDisabled: allowanceSettings.overseas_preparation_fee_disabled || false
-          }
-        }
-      }));
-
-      // 通知設定の編集用状態を初期化
-      setEditingNotificationSettings({
-        email_notifications: notificationSettings?.email_notifications || true,
-        push_notifications: notificationSettings?.push_notifications || true,
-        reminder_time: notificationSettings?.reminder_time || '09:00',
-        approval_only: notificationSettings?.approval_only || false
-      });
-    }
-  }, [user, allowanceSettings, notificationSettings]);
-
-  const handleAllowanceSave = async () => {
-    try {
-      await updateAllowanceSettings({
-        domestic_daily_allowance: userProfile.allowances.domestic.dailyAllowance,
-        domestic_accommodation: userProfile.allowances.domestic.accommodation,
-        domestic_transportation: userProfile.allowances.domestic.transportation,
-        domestic_accommodation_disabled: userProfile.allowances.domestic.accommodationDisabled,
-        domestic_transportation_disabled: userProfile.allowances.domestic.transportationDisabled,
-        overseas_daily_allowance: userProfile.allowances.overseas.dailyAllowance,
-        overseas_accommodation: userProfile.allowances.overseas.accommodation,
-        overseas_transportation: userProfile.allowances.overseas.transportation,
-        overseas_preparation_fee: userProfile.allowances.overseas.preparationFee,
-        overseas_accommodation_disabled: userProfile.allowances.overseas.accommodationDisabled,
-        overseas_transportation_disabled: userProfile.allowances.overseas.transportationDisabled,
-        overseas_preparation_fee_disabled: userProfile.allowances.overseas.preparationFeeDisabled
-      });
-      alert('手当設定が更新されました');
-    } catch (error) {
-      alert('手当設定の更新に失敗しました');
-    }
-  };
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleProfileSave = async () => {
-    try {
-      // 部署名からdepartment_idを取得（Enterpriseプランの場合はdepartment_managementテーブルから）
-      let departmentId = user?.department_id || null;
-      if (userProfile.department_name && userProfile.department_name !== user?.department_name) {
-        // まずdepartment_managementテーブルを確認
-        const { data: enterpriseDept, error: enterpriseError } = await supabase
-          .from('department_management')
-          .select('id')
-          .eq('department_name', userProfile.department_name)
-          .eq('is_active', true)
-          .single();
-        
-        if (!enterpriseError && enterpriseDept) {
-          departmentId = enterpriseDept.id;
-        } else {
-          // department_managementに見つからない場合は、従来のdepartmentsテーブルを確認
-          const { data: departmentData, error: departmentError } = await supabase
-            .from('departments')
-            .select('id')
-            .eq('name', userProfile.department_name)
-            .single();
-          
-          if (departmentError) {
-            console.warn('Department lookup error:', departmentError);
-            // 部署が見つからない場合は、デフォルトの部署IDを使用
-            departmentId = '550e8400-e29b-41d4-a716-446655440001'; // 経営企画部のID
-          } else {
-            departmentId = departmentData.id;
-          }
-        }
-      }
-
-      await updateProfile({
-        full_name: userProfile.full_name,
-        position: userProfile.position,
-        phone_number: userProfile.phone_number,
-        company_name: userProfile.company_name,
-        department_id: departmentId
-      });
-      alert('プロフィールが更新されました');
-    } catch (error) {
-      alert('プロフィールの更新に失敗しました');
-    }
+  const handleProfileSave = () => {
+    // プロフィール情報をローカルストレージに保存
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    alert('プロフィールが更新されました');
   };
 
   const handlePasswordChange = () => {
     setShowPasswordModal(true);
   };
 
-  const handleNotificationSave = async () => {
-    try {
-      await updateNotificationSettings({
-        email_notifications: editingNotificationSettings.email_notifications,
-        push_notifications: editingNotificationSettings.push_notifications,
-        reminder_time: editingNotificationSettings.reminder_time,
-        approval_only: editingNotificationSettings.approval_only
-      });
-      alert('通知設定が更新されました');
-    } catch (error) {
-      alert('通知設定の更新に失敗しました');
-    }
+  const handleNotificationSave = () => {
+    localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings));
+    alert('通知設定が更新されました');
   };
 
-  const handlePlanChange = async (newPlan: string) => {
-    try {
-      await updateProfile({
-        plan: newPlan as 'Free' | 'Pro' | 'Enterprise'
-      });
-      alert(`プランが${newPlan}に変更されました`);
-    } catch (error) {
-      alert('プランの変更に失敗しました');
-    }
-  };
-
-  const hasPermission = (permission: string) => {
-    if (userRole === 'admin') return true;
-    if (permission === 'user_management' && userRole === 'department_admin') return true;
-    if (permission === 'plan_management' && userRole === 'admin') return true;
-    return false;
+  const handlePlanChange = (newPlan: string) => {
+    const updatedProfile = { ...userProfile, currentPlan: newPlan };
+    setUserProfile(updatedProfile);
+    localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+    alert(`プランが${newPlan}に変更されました`);
   };
 
   const tabs = [
@@ -268,8 +135,8 @@ function MyPage({ onNavigate }: MyPageProps) {
           <label className="block text-sm font-medium text-slate-700 mb-2">氏名</label>
           <input
             type="text"
-            value={userProfile.full_name}
-            onChange={(e) => setUserProfile(prev => ({ ...prev, full_name: e.target.value }))}
+            value={userProfile.name}
+            onChange={(e) => setUserProfile(prev => ({ ...prev, name: e.target.value }))}
             className="w-full px-4 py-3 bg-white/50 border border-white/40 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy-400 backdrop-blur-xl"
           />
         </div>
@@ -296,8 +163,8 @@ function MyPage({ onNavigate }: MyPageProps) {
           <label className="block text-sm font-medium text-slate-700 mb-2">電話番号</label>
           <input
             type="tel"
-            value={userProfile.phone_number}
-            onChange={(e) => setUserProfile(prev => ({ ...prev, phone_number: e.target.value }))}
+            value={userProfile.phone}
+            onChange={(e) => setUserProfile(prev => ({ ...prev, phone: e.target.value }))}
             className="w-full px-4 py-3 bg-white/50 border border-white/40 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy-400 backdrop-blur-xl"
           />
         </div>
@@ -305,8 +172,8 @@ function MyPage({ onNavigate }: MyPageProps) {
           <label className="block text-sm font-medium text-slate-700 mb-2">会社名</label>
           <input
             type="text"
-            value={userProfile.company_name}
-            onChange={(e) => setUserProfile(prev => ({ ...prev, company_name: e.target.value }))}
+            value={userProfile.company}
+            onChange={(e) => setUserProfile(prev => ({ ...prev, company: e.target.value }))}
             className="w-full px-4 py-3 bg-white/50 border border-white/40 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy-400 backdrop-blur-xl"
           />
         </div>
@@ -314,10 +181,9 @@ function MyPage({ onNavigate }: MyPageProps) {
           <label className="block text-sm font-medium text-slate-700 mb-2">部署</label>
           <input
             type="text"
-            value={userProfile.department_name || ''}
-            onChange={(e) => setUserProfile(prev => ({ ...prev, department_name: e.target.value }))}
+            value={userProfile.department}
+            onChange={(e) => setUserProfile(prev => ({ ...prev, department: e.target.value }))}
             className="w-full px-4 py-3 bg-white/50 border border-white/40 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy-400 backdrop-blur-xl"
-            placeholder="例：営業部、開発部、人事部など"
           />
         </div>
       </div>
@@ -758,7 +624,7 @@ function MyPage({ onNavigate }: MyPageProps) {
 
       <div className="flex justify-end">
         <button
-          onClick={handleAllowanceSave}
+          onClick={handleProfileSave}
           className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-navy-700 to-navy-900 hover:from-navy-800 hover:to-navy-950 text-white rounded-lg font-medium shadow-xl hover:shadow-2xl transition-all duration-200 transform hover:scale-105"
         >
           <Save className="w-5 h-5" />
@@ -779,8 +645,8 @@ function MyPage({ onNavigate }: MyPageProps) {
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={editingNotificationSettings.email_notifications}
-              onChange={(e) => setEditingNotificationSettings(prev => ({ ...prev, email_notifications: e.target.checked }))}
+              checked={notificationSettings.emailNotifications}
+              onChange={(e) => setNotificationSettings(prev => ({ ...prev, emailNotifications: e.target.checked }))}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-navy-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-navy-600"></div>
@@ -795,8 +661,8 @@ function MyPage({ onNavigate }: MyPageProps) {
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={editingNotificationSettings.push_notifications}
-              onChange={(e) => setEditingNotificationSettings(prev => ({ ...prev, push_notifications: e.target.checked }))}
+              checked={notificationSettings.pushNotifications}
+              onChange={(e) => setNotificationSettings(prev => ({ ...prev, pushNotifications: e.target.checked }))}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-navy-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-navy-600"></div>
@@ -806,8 +672,8 @@ function MyPage({ onNavigate }: MyPageProps) {
         <div className="p-4 bg-white/30 rounded-lg">
           <h3 className="font-medium text-slate-800 mb-3">リマインド時間</h3>
           <select
-            value={editingNotificationSettings.reminder_time}
-            onChange={(e) => setEditingNotificationSettings(prev => ({ ...prev, reminder_time: e.target.value }))}
+            value={notificationSettings.reminderTime}
+            onChange={(e) => setNotificationSettings(prev => ({ ...prev, reminderTime: e.target.value }))}
             className="w-full px-4 py-3 bg-white/50 border border-white/40 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-navy-400 backdrop-blur-xl"
           >
             <option value="08:00">08:00</option>
@@ -832,8 +698,8 @@ function MyPage({ onNavigate }: MyPageProps) {
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={editingNotificationSettings.approval_only}
-              onChange={(e) => setEditingNotificationSettings(prev => ({ ...prev, approval_only: e.target.checked }))}
+              checked={notificationSettings.approvalOnly}
+              onChange={(e) => setNotificationSettings(prev => ({ ...prev, approvalOnly: e.target.checked }))}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-navy-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-navy-600"></div>
